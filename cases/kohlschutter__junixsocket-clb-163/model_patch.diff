@@ -1,0 +1,47 @@
+diff --git a/junixsocket-native/src/main/c/org_newsclub_net_unix_NativeUnixSocket.c b/junixsocket-native/src/main/c/org_newsclub_net_unix_NativeUnixSocket.c
+index fc32a4e..e264644 100644
+--- a/junixsocket-native/src/main/c/org_newsclub_net_unix_NativeUnixSocket.c
++++ b/junixsocket-native/src/main/c/org_newsclub_net_unix_NativeUnixSocket.c
+@@ -184,6 +184,15 @@ typedef unsigned long socklen_t; /* 64-bits */
+ #else
+ #  define socket_errno errno
+ #endif
++// Use fstatat on Linux to avoid symbol versioning issues with older glibc (< 2.14)
++// This is necessary because stat() in newer glibc uses versioned symbols that
++// do not exist in older versions
++#if defined(__linux__) && !defined(_WIN32)
++#  define junixsocket_stat(path, buf) fstatat(AT_FDCWD, (path), (buf), 0)
++#else
++#  define junixsocket_stat(path, buf) stat((path), (buf))
++#endif
++
+ 
+ typedef enum {
+     kExceptionSocketException = 0,
+@@ -696,7 +705,7 @@ JNIEXPORT void JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_accept(
+         struct stat fdStat;
+ 
+         // It's OK when the file's gone, but not OK if it refers to another inode.
+-        int statRes = stat(su.sun_path, &fdStat);
++        int statRes = junixsocket_stat(su.sun_path, &fdStat);
+         if(statRes == 0) {
+             ino_t statInode = fdStat.st_ino;
+ 
+@@ -986,7 +995,7 @@ JNIEXPORT jlong JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_bind(
+         inode = 0;
+     } else {
+ #if !defined(_WIN32)
+-        int statRes = stat(su.sun_path, &fdStat);
++        int statRes = junixsocket_stat(su.sun_path, &fdStat);
+         if(statRes == -1) {
+             myErr = errno;
+             _closeFd(env, fd, serverHandle);
+@@ -1115,7 +1124,7 @@ JNIEXPORT void JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_connect(
+         struct stat fdStat;
+ 
+         // It's OK when the file's gone, but not OK if it refers to another inode.
+-        int statRes = stat(su.sun_path, &fdStat);
++        int statRes = junixsocket_stat(su.sun_path, &fdStat);
+         if(statRes == 0) {
+             ino_t statInode = fdStat.st_ino;
+ 

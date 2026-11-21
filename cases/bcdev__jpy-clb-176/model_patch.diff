@@ -1,0 +1,18 @@
+diff --git a/src/main/c/jpy_jobj.c b/src/main/c/jpy_jobj.c
+index 198d0c5..1f32e27 100644
+--- a/src/main/c/jpy_jobj.c
++++ b/src/main/c/jpy_jobj.c
+@@ -598,6 +598,13 @@ int JObj_sq_ass_item(JPy_JObj* self, Py_ssize_t index, PyObject* pyItem)
+         return -1;
+     }
+ 
++    // When pyItem is NULL, it means Python is trying to delete the item.
++    // Java arrays have a fixed size and do not support item deletion.
++    if (pyItem == NULL) {
++        PyErr_SetString(PyExc_TypeError, "Java array object does not support item deletion");
++        return -1;
++    }
++
+     // Note: the following item assignments are not value range checked
+     if (componentType == JPy_JBoolean) {
+         jboolean item = JPy_AS_JBOOLEAN(pyItem);

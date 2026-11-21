@@ -1,0 +1,56 @@
+diff --git a/src_c/event.c b/src_c/event.c
+index a4ae2d7..ba25e94 100644
+--- a/src_c/event.c
++++ b/src_c/event.c
+@@ -1316,26 +1316,25 @@ pg_event_get(PyObject *self, PyObject *args)
+                     PyExc_TypeError,
+                     "type sequence must contain valid event types");
+             }
+-            if (SDL_PeepEvents(&event, 1, SDL_GETEVENT, val, val) < 0) {
+-                Py_DECREF(list);
+-                return RAISE(pgExc_SDLError, SDL_GetError());
++            while (SDL_PeepEvents(&event, 1, SDL_GETEVENT, val, val) == 1) {
++                if(!_pg_event_append_to_list(list, &event))
++                    return NULL;
+             }
+-            if(!_pg_event_append_to_list(list, &event))
+-                return NULL;
+         }
+     }
+     else if (pg_IntFromObj(type, &val)) {
+-        if (SDL_PeepEvents(&event, 1, SDL_GETEVENT, val, val) < 0) {
+-            Py_DECREF(list);
+-            return RAISE(pgExc_SDLError, SDL_GetError());
++        while (SDL_PeepEvents(&event, 1, SDL_GETEVENT, val, val) == 1) {
++            if(!_pg_event_append_to_list(list, &event))
++                return NULL;
+         }
+-        if(!_pg_event_append_to_list(list, &event))
+-            return NULL;
++    }
++    else {
++        Py_DECREF(list);
++        return RAISE(PyExc_TypeError,
++                     "get type must be numeric or a sequence");
+     }
+ 
+-    Py_DECREF(list);
+-    return RAISE(PyExc_TypeError,
+-                 "get type must be numeric or a sequence");
++    return list;
+ }
+ #endif /* IS_SDLv2 */
+ 
+@@ -1403,8 +1402,11 @@ pg_event_peek(PyObject *self, PyObject *args)
+     SDL_PumpEvents();
+ 
+     if (PyTuple_Size(args) == 0) {
+-        if (SDL_PeepEvents(&event, 1, SDL_PEEKEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT) < 0)
++        result = SDL_PeepEvents(&event, 1, SDL_PEEKEVENT, SDL_FIRSTEVENT, SDL_LASTEVENT);
++        if (result < 0)
+             return RAISE(pgExc_SDLError, SDL_GetError());
++        if (result == 0)
++            return PyInt_FromLong(0);
+         return pgEvent_New(&event);
+     }
+ 

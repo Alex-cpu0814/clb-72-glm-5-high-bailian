@@ -1,0 +1,38 @@
+diff --git a/modules/core/src/main/java/org/lwjgl/system/Library.java b/modules/core/src/main/java/org/lwjgl/system/Library.java
+index 3a0d432..759e3d5 100644
+--- a/modules/core/src/main/java/org/lwjgl/system/Library.java
++++ b/modules/core/src/main/java/org/lwjgl/system/Library.java
+@@ -15,7 +15,14 @@ import static org.lwjgl.system.APIUtil.*;
+ public final class Library {
+ 
+ 	/** The LWJGL native library name */
+-	public static final String JNI_LIBRARY_NAME = Configuration.LIBRARY_NAME_LWJGL.get(System.getProperty("os.arch").contains("64") ? "lwjgl" : "lwjgl32");
++	// Use sun.arch.data.model first (more reliable), then fall back to os.arch check
++	private static boolean is64Bit() {
++		String dataModel = System.getProperty("sun.arch.data.model");
++		String osArch = System.getProperty("os.arch");
++		return "64".equals(dataModel) || osArch.contains("64") || osArch.contains("86_64");
++	}
++
++	public static final String JNI_LIBRARY_NAME = Configuration.LIBRARY_NAME_LWJGL.get(is64Bit() ? "lwjgl" : "lwjgl32");
+ 
+ 	private static final String JAVA_LIBRARY_PATH = "java.library.path";
+ 
+diff --git a/modules/core/src/main/java/org/lwjgl/system/SharedLibraryLoader.java b/modules/core/src/main/java/org/lwjgl/system/SharedLibraryLoader.java
+index aee818c..536b51a 100644
+--- a/modules/core/src/main/java/org/lwjgl/system/SharedLibraryLoader.java
++++ b/modules/core/src/main/java/org/lwjgl/system/SharedLibraryLoader.java
+@@ -46,8 +46,11 @@ final class SharedLibraryLoader {
+ 		String runtime = System.getProperty("java.runtime.name");
+ 		AOT = !(runtime != null && runtime.contains("Android Runtime")) && !LINUX && !MACOSX && !WINDOWS;
+ 
+-		ARM = osArch.startsWith("arm");
+-		x64 = osArch.contains("64");
++		ARM = osArch.startsWith("arm") || osArch.startsWith("aarch64");
++
++		// Use sun.arch.data.model first (more reliable), then fall back to os.arch check
++		String dataModel = System.getProperty("sun.arch.data.model");
++		x64 = "64".equals(dataModel) || osArch.contains("64") || osArch.contains("86_64");
+ 
+ 		String archABI = System.getProperty("sun.arch.abi"); // JDK 8 only
+ 		ABI = archABI != null ? archABI : "";

@@ -1,0 +1,24 @@
+diff --git a/numpy/core/src/multiarray/item_selection.c b/numpy/core/src/multiarray/item_selection.c
+index 762563e..1bffa0a 100644
+--- a/numpy/core/src/multiarray/item_selection.c
++++ b/numpy/core/src/multiarray/item_selection.c
+@@ -1456,7 +1456,7 @@ PyArray_LexSort(PyObject *sort_keys, int axis)
+ 
+     /* Now we can check the axis */
+     nd = PyArray_NDIM(mps[0]);
+-    if ((nd == 0) || (PyArray_SIZE(mps[0]) == 1)) {
++    if ((nd == 0) || (PyArray_SIZE(mps[0]) <= 1)) {
+         /* single element case */
+         ret = (PyArrayObject *)PyArray_NewFromDescr(
+             &PyArray_Type, PyArray_DescrFromType(NPY_INTP),
+@@ -1466,7 +1466,9 @@ PyArray_LexSort(PyObject *sort_keys, int axis)
+         if (ret == NULL) {
+             goto fail;
+         }
+-        *((npy_intp *)(PyArray_DATA(ret))) = 0;
++        if (PyArray_SIZE(ret) > 0) {
++            *((npy_intp *)(PyArray_DATA(ret))) = 0;
++        }
+         goto finish;
+     }
+     if (check_and_adjust_axis(&axis, nd) < 0) {

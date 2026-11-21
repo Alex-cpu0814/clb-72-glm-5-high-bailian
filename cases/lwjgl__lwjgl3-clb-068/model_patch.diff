@@ -1,0 +1,26 @@
+diff --git a/modules/lwjgl/openvr/src/generated/java/org/lwjgl/openvr/VRCompositor.java b/modules/lwjgl/openvr/src/generated/java/org/lwjgl/openvr/VRCompositor.java
+index 3f74600..aef2412 100644
+--- a/modules/lwjgl/openvr/src/generated/java/org/lwjgl/openvr/VRCompositor.java
++++ b/modules/lwjgl/openvr/src/generated/java/org/lwjgl/openvr/VRCompositor.java
+@@ -71,8 +71,8 @@ public class VRCompositor {
+      * start rendering.
+      */
+     @NativeType("EVRCompositorError")
+-    public static int VRCompositor_WaitGetPoses(@NativeType("TrackedDevicePose_t *") TrackedDevicePose.Buffer pRenderPoseArray, @NativeType("TrackedDevicePose_t *") TrackedDevicePose.Buffer pGamePoseArray) {
+-        return nVRCompositor_WaitGetPoses(pRenderPoseArray.address(), pRenderPoseArray.remaining(), pGamePoseArray.address(), pGamePoseArray.remaining());
++    public static int VRCompositor_WaitGetPoses(@NativeType("TrackedDevicePose_t *") TrackedDevicePose.Buffer pRenderPoseArray, @Nullable @NativeType("TrackedDevicePose_t *") TrackedDevicePose.Buffer pGamePoseArray) {
++        return nVRCompositor_WaitGetPoses(pRenderPoseArray.address(), pRenderPoseArray.remaining(), memAddressSafe(pGamePoseArray), remainingSafe(pGamePoseArray));
+     }
+ 
+     // --- [ VRCompositor_GetLastPoses ] ---
+@@ -88,8 +88,8 @@ public class VRCompositor {
+ 
+     /** Get the last set of poses returned by {@link #VRCompositor_WaitGetPoses WaitGetPoses}. */
+     @NativeType("EVRCompositorError")
+-    public static int VRCompositor_GetLastPoses(@NativeType("TrackedDevicePose_t *") TrackedDevicePose.Buffer pRenderPoseArray, @NativeType("TrackedDevicePose_t *") TrackedDevicePose.Buffer pGamePoseArray) {
+-        return nVRCompositor_GetLastPoses(pRenderPoseArray.address(), pRenderPoseArray.remaining(), pGamePoseArray.address(), pGamePoseArray.remaining());
++    public static int VRCompositor_GetLastPoses(@NativeType("TrackedDevicePose_t *") TrackedDevicePose.Buffer pRenderPoseArray, @Nullable @NativeType("TrackedDevicePose_t *") TrackedDevicePose.Buffer pGamePoseArray) {
++        return nVRCompositor_GetLastPoses(pRenderPoseArray.address(), pRenderPoseArray.remaining(), memAddressSafe(pGamePoseArray), remainingSafe(pGamePoseArray));
+     }
+ 
+     // --- [ VRCompositor_GetLastPoseForTrackedDeviceIndex ] ---

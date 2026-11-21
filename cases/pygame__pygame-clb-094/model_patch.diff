@@ -1,0 +1,59 @@
+diff --git a/src/surface_fill.c b/src/surface_fill.c
+index b5f5474..4e8fba3 100644
+--- a/src/surface_fill.c
++++ b/src/surface_fill.c
+@@ -800,6 +800,54 @@ surface_fill_blend (SDL_Surface *surface, SDL_Rect *rect, Uint32 color,
+ {
+     int result = -1;
+     int locked = 0;
++    SDL_Rect clip_rect, final_rect;
++    int x, y, w, h;
++
++    /* Clip the rectangle to the surface boundaries */
++    if (rect)
++    {
++        /* Use the surface's clip rectangle */
++        clip_rect = surface->clip_rect;
++
++        /* Clip x */
++        x = rect->x;
++        w = rect->w;
++        if (x < clip_rect.x)
++        {
++            w -= (clip_rect.x - x);
++            x = clip_rect.x;
++        }
++        if (x + w > clip_rect.x + clip_rect.w)
++        {
++            w = clip_rect.x + clip_rect.w - x;
++        }
++        
++        /* Clip y */
++        y = rect->y;
++        h = rect->h;
++        if (y < clip_rect.y)
++        {
++            h -= (clip_rect.y - y);
++            y = clip_rect.y;
++        }
++        if (y + h > clip_rect.y + clip_rect.h)
++        {
++            h = clip_rect.y + clip_rect.h - y;
++        }
++
++        /* Nothing to do */
++        if (w <= 0 || h <= 0)
++        {
++            return 0;
++        }
++
++        /* Update the rect to be used */
++        final_rect.x = x;
++        final_rect.y = y;
++        final_rect.w = w;
++        final_rect.h = h;
++        rect = &final_rect;
++    }
+ 
+     /* Lock the surface, if needed */
+     if (SDL_MUSTLOCK (surface))

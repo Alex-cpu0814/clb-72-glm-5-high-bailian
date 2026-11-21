@@ -1,0 +1,22 @@
+diff --git a/junixsocket-native/src/main/c/address.c b/junixsocket-native/src/main/c/address.c
+index 6a530ba..1273526 100644
+--- a/junixsocket-native/src/main/c/address.c
++++ b/junixsocket-native/src/main/c/address.c
+@@ -418,7 +418,16 @@ JNIEXPORT jint JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_bytesToSockAd
+ #endif
+     }
+ 
+-    return (jint)sockAddrLen;
++    // For AF_UNIX sockets, return the actual length needed for the address.
++    // This is particularly important for abstract namespace sockets where the
++    // length matters for matching clients.
++    if(domain == AF_UNIX) {
++        // The actual sockaddr_un length is offsetof(struct sockaddr_un, sun_path) + len
++        // where len is the length of the address bytes (including leading NUL for abstract namespace)
++        return (jint)(offsetof(struct sockaddr_un, sun_path) + len);
++    } else {
++        return (jint)sockAddrLen;
++    }
+ }
+ 
+ /*

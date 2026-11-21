@@ -1,0 +1,31 @@
+diff --git a/scipy/interpolate/src/_fitpackmodule.c b/scipy/interpolate/src/_fitpackmodule.c
+index 52cd383..9060396 100644
+--- a/scipy/interpolate/src/_fitpackmodule.c
++++ b/scipy/interpolate/src/_fitpackmodule.c
+@@ -359,7 +359,7 @@ fitpack_surfit(PyObject *dummy, PyObject *args)
+             || ap_c == NULL) {
+         goto fail;
+     }
+-    if ((iopt == 0)||(nx > nxo)||(ny > nyo)) {
++    if ((iopt <= 0)||(nx > nxo)||(ny > nyo)) {
+         Py_XDECREF(ap_wrk);
+         dims[0] = lc;
+         ap_wrk = (PyArrayObject *)PyArray_SimpleNew(1, dims, NPY_DOUBLE);
+@@ -499,7 +499,7 @@ fitpack_parcur(PyObject *dummy, PyObject *args)
+     if (ap_t == NULL || ap_c == NULL) {
+         goto fail;
+     }
+-    if (iopt == 0|| n > no) {
++    if (iopt <= 0 || n > no) {
+         Py_XDECREF(ap_wrk);
+         ap_wrk = NULL;
+         Py_XDECREF(ap_iwrk);
+@@ -624,7 +624,7 @@ fitpack_curfit(PyObject *dummy, PyObject *args)
+     if (ap_c == NULL) {
+         goto fail;
+     }
+-    if (iopt == 0 || n > no) {
++    if (iopt <= 0 || n > no) {
+         Py_XDECREF(ap_wrk);
+         Py_XDECREF(ap_iwrk);
+         dims[0] = n;

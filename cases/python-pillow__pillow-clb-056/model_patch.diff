@@ -1,0 +1,12 @@
+diff --git a/src/PIL/Jpeg2KImagePlugin.py b/src/PIL/Jpeg2KImagePlugin.py
+index 0904b24..99739ab 100644
+--- a/src/PIL/Jpeg2KImagePlugin.py
++++ b/src/PIL/Jpeg2KImagePlugin.py
+@@ -317,6 +317,7 @@ def _accept(prefix):
+ 
+ 
+ def _save(im, fp, filename):
++    filename = os.fsdecode(filename)
+     if filename.endswith(".j2k"):
+         kind = "j2k"
+     else:

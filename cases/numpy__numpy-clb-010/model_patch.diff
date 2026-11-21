@@ -1,0 +1,93 @@
+diff --git a/numpy/core/src/multiarray/methods.c b/numpy/core/src/multiarray/methods.c
+index 8a659fa..eae9f8d 100644
+--- a/numpy/core/src/multiarray/methods.c
++++ b/numpy/core/src/multiarray/methods.c
+@@ -117,8 +117,10 @@ array_take(PyArrayObject *self, PyObject *args, PyObject *kwds)
+                                      PyArray_ClipmodeConverter, &mode))
+         return NULL;
+ 
+-    return PyArray_Return((PyArrayObject *)
+-                PyArray_TakeFrom(self, indices, dimension, out, mode));
++    PyArrayObject *ret;
++
++    ret = (PyArrayObject *)PyArray_TakeFrom(self, indices, dimension, out, mode);
++    return out == NULL ? PyArray_Return(ret) : (PyObject *)ret;
+ }
+ 
+ static PyObject *
+@@ -274,7 +276,10 @@ array_argmax(PyArrayObject *self, PyObject *args, PyObject *kwds)
+                                      PyArray_OutputConverter, &out))
+         return NULL;
+ 
+-    return PyArray_Return((PyArrayObject *)PyArray_ArgMax(self, axis, out));
++    PyArrayObject *ret;
++
++    ret = (PyArrayObject *)PyArray_ArgMax(self, axis, out);
++    return out == NULL ? PyArray_Return(ret) : (PyObject *)ret;
+ }
+ 
+ static PyObject *
+@@ -289,7 +294,10 @@ array_argmin(PyArrayObject *self, PyObject *args, PyObject *kwds)
+                                      PyArray_OutputConverter, &out))
+         return NULL;
+ 
+-    return PyArray_Return((PyArrayObject *)PyArray_ArgMin(self, axis, out));
++    PyArrayObject *ret;
++
++    ret = (PyArrayObject *)PyArray_ArgMin(self, axis, out);
++    return out == NULL ? PyArray_Return(ret) : (PyObject *)ret;
+ }
+ 
+ static PyObject *
+@@ -1189,7 +1197,10 @@ array_choose(PyArrayObject *self, PyObject *args, PyObject *kwds)
+         return NULL;
+     }
+ 
+-    return PyArray_Return((PyArrayObject *)PyArray_Choose(self, choices, out, clipmode));
++    PyArrayObject *ret;
++
++    ret = (PyArrayObject *)PyArray_Choose(self, choices, out, clipmode);
++    return out == NULL ? PyArray_Return(ret) : (PyObject *)ret;
+ }
+ 
+ static PyObject *
+@@ -2247,7 +2258,7 @@ array_dot(PyArrayObject *self, PyObject *args, PyObject *kwds)
+         }
+     }
+     ret = (PyArrayObject *)PyArray_MatrixProduct2(a, b, (PyArrayObject *)o);
+-    return PyArray_Return(ret);
++    return o == NULL ? PyArray_Return(ret) : (PyObject *)ret;
+ }
+ 
+ 
+@@ -2324,9 +2335,12 @@ array_trace(PyArrayObject *self, PyObject *args, PyObject *kwds)
+         return NULL;
+     }
+ 
++    PyArrayObject *ret;
++
+     rtype = _CHKTYPENUM(dtype);
+     Py_XDECREF(dtype);
+-    return PyArray_Return((PyArrayObject *)PyArray_Trace(self, offset, axis1, axis2, rtype, out));
++    ret = (PyArrayObject *)PyArray_Trace(self, offset, axis1, axis2, rtype, out);
++    return out == NULL ? PyArray_Return(ret) : (PyObject *)ret;
+ }
+ 
+ #undef _CHKTYPENUM
+@@ -2406,12 +2420,15 @@ array_round(PyArrayObject *self, PyObject *args, PyObject *kwds)
+     PyArrayObject *out = NULL;
+     static char *kwlist[] = {"decimals", "out", NULL};
+ 
++    PyArrayObject *ret;
++
+     if (!PyArg_ParseTupleAndKeywords(args, kwds, "|iO&:round", kwlist,
+                                      &decimals,
+                                      PyArray_OutputConverter, &out)) {
+         return NULL;
+     }
+-    return PyArray_Return((PyArrayObject *)PyArray_Round(self, decimals, out));
++    ret = (PyArrayObject *)PyArray_Round(self, decimals, out);
++    return out == NULL ? PyArray_Return(ret) : (PyObject *)ret;
+ }
+ 
+ 

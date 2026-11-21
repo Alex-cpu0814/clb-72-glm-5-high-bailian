@@ -1,0 +1,101 @@
+diff --git a/_imaging.c b/_imaging.c
+index b7726a2..130e781 100644
+--- a/_imaging.c
++++ b/_imaging.c
+@@ -2197,19 +2197,25 @@ textwidth(ImagingFontObject* self, const unsigned char* text)
+     return xsize;
+ }
+ 
+-void _font_text_asBytes(PyObject* encoded_string, unsigned char** text){
++PyObject*
++_font_text_asBytes(PyObject* encoded_string, unsigned char** text)
++{
+     PyObject* bytes = NULL;
+ 
+     *text = NULL;
+ 
+     if (PyUnicode_CheckExact(encoded_string)){
+         bytes = PyUnicode_AsLatin1String(encoded_string);
++        if (!bytes) {
++            return NULL;
++        }
+     } else if (PyBytes_Check(encoded_string)) {
+         bytes = encoded_string;
++        Py_INCREF(bytes);
+     }
+     if (bytes) {
+         *text = (unsigned char*)PyBytes_AsString(bytes);
+-        return;
++        return bytes;
+     }
+ 
+ #if PY_VERSION_HEX < 0x03000000
+@@ -2219,6 +2225,8 @@ void _font_text_asBytes(PyObject* encoded_string, unsigned char** text){
+         *text = (unsigned char *)PyString_AsString(encoded_string);
+     }
+ #endif
++
++    return NULL;
+ }
+ 
+ 
+@@ -2233,6 +2241,7 @@ _font_getmask(ImagingFontObject* self, PyObject* args)
+     Glyph* glyph;
+ 
+     PyObject* encoded_string;
++    PyObject* bytes;
+ 
+     unsigned char* text;
+     char* mode = "";
+@@ -2241,13 +2250,14 @@ _font_getmask(ImagingFontObject* self, PyObject* args)
+         return NULL;
+     }
+ 
+-    _font_text_asBytes(encoded_string, &text);
+-    if (!text) {
++    bytes = _font_text_asBytes(encoded_string, &text);
++    if (!bytes) {
+         return NULL;
+     }
+ 
+     im = ImagingNew(self->bitmap->mode, textwidth(self, text), self->ysize);
+     if (!im) {
++        Py_DECREF(bytes);
+         return NULL;
+     }
+ 
+@@ -2273,9 +2283,11 @@ _font_getmask(ImagingFontObject* self, PyObject* args)
+         x = x + glyph->dx;
+         b = b + glyph->dy;
+     }
++    Py_DECREF(bytes);
+     return PyImagingNew(im);
+ 
+   failed:
++    Py_DECREF(bytes);
+     ImagingDelete(im);
+     return NULL;
+ }
+@@ -2285,16 +2297,19 @@ _font_getsize(ImagingFontObject* self, PyObject* args)
+ {
+     unsigned char* text;
+     PyObject* encoded_string;
++    PyObject* bytes;
+ 
+     if (!PyArg_ParseTuple(args, "O:getsize", &encoded_string))
+         return NULL;
+ 
+-    _font_text_asBytes(encoded_string, &text);
+-    if (!text) {
++    bytes = _font_text_asBytes(encoded_string, &text);
++    if (!bytes) {
+         return NULL;
+     }
+ 
+-    return Py_BuildValue("ii", textwidth(self, text), self->ysize);
++    PyObject* result = Py_BuildValue("ii", textwidth(self, text), self->ysize);
++    Py_DECREF(bytes);
++    return result;
+ }
+ 
+ static struct PyMethodDef _font_methods[] = {

@@ -1,0 +1,65 @@
+diff --git a/src/jep/util.c b/src/jep/util.c
+index 2868940..289355e 100644
+--- a/src/jep/util.c
++++ b/src/jep/util.c
+@@ -1495,9 +1495,9 @@ int pyarg_matches_jtype(JNIEnv *env,
+         
+         if(pyjobject_check(param)) {
+             // check if the object itself can cast to parameter type.
+-            if((*env)->IsAssignableFrom(env,
+-                                        ((PyJobject_Object *) param)->clazz,
+-                                        paramType))
++            if((*env)->IsInstanceOf(env,
++                                    ((PyJobject_Object *) param)->object,
++                                    paramType))
+                 return 1;
+         }
+         
+@@ -1509,9 +1509,9 @@ int pyarg_matches_jtype(JNIEnv *env,
+         
+         if(pyjarray_check(param)) {
+             // check if the object itself can cast to parameter type.
+-            if((*env)->IsAssignableFrom(env,
+-                                        ((PyJarray_Object *) param)->clazz,
+-                                        paramType))
++            if((*env)->IsInstanceOf(env,
++                                    ((PyJarray_Object *) param)->object,
++                                    paramType))
+                 return 1;
+         }
+ 
+@@ -1532,9 +1532,9 @@ int pyarg_matches_jtype(JNIEnv *env,
+         
+         if(pyjobject_check(param)) {
+             // check if the object itself can cast to parameter type.
+-            if((*env)->IsAssignableFrom(env,
+-                                        ((PyJobject_Object *) param)->clazz,
+-                                        paramType))
++            if((*env)->IsInstanceOf(env,
++                                    ((PyJobject_Object *) param)->object,
++                                    paramType))
+                 return 1;
+         }
+ 
+@@ -1885,8 +1885,8 @@ jvalue convert_pyarg_jvalue(JNIEnv *env,
+             
+             ar = (PyJarray_Object *) param;
+             
+-            if(!(*env)->IsAssignableFrom(env,
+-                                         ar->clazz,
++            if(!(*env)->IsInstanceOf(env,
++                                         ar->object,
+                                          paramType)) {
+                 PyErr_Format(PyExc_TypeError,
+                              "Incompatible array type at parameter %i.",
+@@ -1961,8 +1961,8 @@ jvalue convert_pyarg_jvalue(JNIEnv *env,
+             }
+ 
+             // check object itself is assignable to that type.
+-            if(!(*env)->IsAssignableFrom(env,
+-                                         ((PyJobject_Object *) param)->clazz,
++            if(!(*env)->IsInstanceOf(env,
++                                         ((PyJobject_Object *) param)->object,
+                                          paramType)) {
+                 PyErr_Format(PyExc_TypeError,
+                              "Incorrect object type at %i.",

@@ -1,0 +1,60 @@
+diff --git a/python/_tskitmodule.c b/python/_tskitmodule.c
+index 69afab9..16e5b77 100644
+--- a/python/_tskitmodule.c
++++ b/python/_tskitmodule.c
+@@ -9022,6 +9022,8 @@ Tree_get_newick(Tree *self, PyObject *args, PyObject *kwds)
+     int root, err;
+     size_t buffer_size;
+     char *buffer = NULL;
++    /* We need to iterate when we overflow the buffer */
++    int j, max_retries = 10;
+ 
+     if (Tree_check_tree(self) != 0) {
+         goto out;
+@@ -9033,18 +9035,35 @@ Tree_get_newick(Tree *self, PyObject *args, PyObject *kwds)
+         PyErr_SetString(PyExc_ValueError, "Precision must be between 0 and 16, inclusive");
+         goto out;
+     }
+-    buffer_size = tsk_treeseq_get_num_nodes(self->tree->tree_sequence);
+-    /* For every node, we have roughly precision bytes, plus bracketing and leading values.
+-     * This is a rough guess, so add 10 just to be on the safe side. We might need
+-     * to be more precise with this though if we have large time values.
+-     */
+-    buffer_size *= precision + 10;
+-    buffer = PyMem_Malloc(buffer_size);
+-    if (buffer == NULL) {
+-        PyErr_NoMemory();
++    /* A simple estimate for the required buffer size. The actual size depends
++     * on the tree shape and the size of the node labels and time values.
++     * We have ~ 8 characters per node for the node label and punctuation,
++     * plus the size of the branch lengths. Branch lengths are floats with
++     * the specified precision, but also depend on the magnitude of the time
++     * values. We conservatively estimate an average of 30 characters per
++     * branch length, which should cover most cases. */
++    buffer_size = 8 + 30;
++    buffer_size *= tsk_treeseq_get_num_nodes(self->tree->tree_sequence);
++    for (j = 0; j < max_retries; j++) {
++        buffer = PyMem_Malloc(buffer_size);
++        if (buffer == NULL) {
++            PyErr_NoMemory();
++            goto out;
++        }
++        err = tsk_convert_newick(self->tree, (tsk_id_t) root, precision, 0,
++                buffer_size, buffer);
++        if (err == 0) {
++            break;
++        }
++        PyMem_Free(buffer);
++        buffer = NULL;
++        if (err != TSK_ERR_BUFFER_OVERFLOW) {
++            handle_library_error(err);
++            goto out;
++        }
++        /* Double the buffer size and try again */
++        buffer_size *= 2;
+     }
+-    err = tsk_convert_newick(self->tree, (tsk_id_t) root, precision, 0,
+-            buffer_size, buffer);
+     if (err != 0) {
+         handle_library_error(err);
+         goto out;

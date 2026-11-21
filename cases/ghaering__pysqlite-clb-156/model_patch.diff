@@ -1,0 +1,41 @@
+diff --git a/src/connection.c b/src/connection.c
+index 537e488..6f6fd49 100644
+--- a/src/connection.c
++++ b/src/connection.c
+@@ -1426,6 +1426,27 @@ finally:
+     return retval;
+ }
+ 
++static PyObject *
++pysqlite_connection_limit(pysqlite_Connection* self, PyObject* args)
++{
++    int id;
++    int value = -1;
++    int old_value;
++
++    if (!pysqlite_check_thread(self) || !pysqlite_check_connection(self)) {
++        return NULL;
++    }
++
++    if (!PyArg_ParseTuple(args, "i|i", &id, &value)) {
++        return NULL;
++    }
++
++    old_value = sqlite3_limit(self->db, id, value);
++
++    return PyInt_FromLong(old_value);
++}
++
++
+ /* Function author: Paul Kippes <kippesp@gmail.com>
+  * Class method of Connection to call the Python function _iterdump
+  * of the sqlite3 module.
+@@ -1629,6 +1650,8 @@ static PyMethodDef connection_methods[] = {
+         PyDoc_STR("Creates a collation function. Non-standard.")},
+     {"interrupt", (PyCFunction)pysqlite_connection_interrupt, METH_NOARGS,
+         PyDoc_STR("Abort any pending database operation. Non-standard.")},
++    {"limit", (PyCFunction)pysqlite_connection_limit, METH_VARARGS,
++        PyDoc_STR("Set and/or get a limit. Non-standard.")},
+     {"iterdump", (PyCFunction)pysqlite_connection_iterdump, METH_NOARGS,
+         PyDoc_STR("Returns iterator to the dump of the database in an SQL text format. Non-standard.")},
+     {"__enter__", (PyCFunction)pysqlite_connection_enter, METH_NOARGS,

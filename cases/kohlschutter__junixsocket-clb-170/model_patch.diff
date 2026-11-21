@@ -1,0 +1,18 @@
+diff --git a/junixsocket-common/src/main/java/org/newsclub/net/unix/NativeLibraryLoader.java b/junixsocket-common/src/main/java/org/newsclub/net/unix/NativeLibraryLoader.java
+index 1e2b46f..946e3c7 100644
+--- a/junixsocket-common/src/main/java/org/newsclub/net/unix/NativeLibraryLoader.java
++++ b/junixsocket-common/src/main/java/org/newsclub/net/unix/NativeLibraryLoader.java
+@@ -195,11 +195,11 @@ final class NativeLibraryLoader implements Closeable {
+           System.load(libFile.getAbsolutePath());
+         } catch (UnsatisfiedLinkError e) {
+           String message = e.getMessage().toLowerCase(Locale.getDefault());
+-          if (!message.contains("perm")) {
++          if (!message.contains("perm") && !message.contains("failed to map segment")) {
+             throw e;
+           }
+ 
+-          // Operation not permitted; permission denied; EPERM...
++          // Operation not permitted; permission denied; EPERM... or failed to map segment from shared object
+           // -> tmp directory may be mounted with "noexec", try loading from user.home, user.dir
+ 
+           switch (attempt) {

@@ -1,0 +1,30 @@
+diff --git a/src/jep/Jep.java b/src/jep/Jep.java
+index 3bd72f8..444e01f 100644
+--- a/src/jep/Jep.java
++++ b/src/jep/Jep.java
+@@ -1085,10 +1085,21 @@ public final class Jep implements Closeable {
+         if (this.closed)
+             return;
+ 
+-        /*
+-         * close() seems to get away with not checking isValidThread() since it
+-         * does very little JNI interaction, mostly just cpython code
+-         */
++        // check if we're on the right thread
++        if (this.thread != Thread.currentThread()) {
++            if (this.thread.isAlive()) {
++                // thread is still alive but we're on the wrong thread
++                throw new IllegalStateException(
++                        "Jep.close() must be called from the same thread that created the Jep instance.");
++            }
++            // the original thread is dead, we can't safely close the
++            // Python interpreter from this thread
++            this.closed = true;
++            System.err.println(
++                    "JEP WARNING: Jep.close() was called from a different thread after the original thread terminated. "
++                            + "The Python sub-interpreter could not be closed properly and memory was leaked.");
++            return;
++        }
+ 
+         // close all the PyObjects we created
+         for (int i = 0; i < this.pythonObjects.size(); i++)

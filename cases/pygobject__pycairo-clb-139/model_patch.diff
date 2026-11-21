@@ -1,0 +1,30 @@
+diff --git a/cairo/surface.c b/cairo/surface.c
+index 517db53..d7a64ad 100644
+--- a/cairo/surface.c
++++ b/cairo/surface.c
+@@ -294,6 +294,7 @@ surface_get_device (PycairoSurface *o) {
+   cairo_device_t *device = cairo_surface_get_device (o->surface);
+   if (device == NULL)
+     Py_RETURN_NONE;
++  cairo_device_reference (device);
+   return PycairoDevice_FromDevice (device);
+ }
+ 
+@@ -1413,7 +1414,7 @@ script_surface_new (PyTypeObject *type, PyObject *args, PyObject *kwds) {
+   return PycairoSurface_FromSurface (
+     cairo_script_surface_create (
+       ((PycairoDevice*)pydevice)->device, content, width, height),
+-    NULL);
++    pydevice);
+ }
+ 
+ static PyObject *
+@@ -1427,7 +1428,7 @@ script_surface_create_for_target (PyTypeObject *type, PyObject *args) {
+   return PycairoSurface_FromSurface (
+     cairo_script_surface_create_for_target (
+       ((PycairoDevice*)pydevice)->device, ((PycairoSurface*)target)->surface),
+-    NULL);
++    pydevice);
+ }
+ 
+ static PyMethodDef script_surface_methods[] = {

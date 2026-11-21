@@ -1,0 +1,66 @@
+diff --git a/src/main/c/jpy_jmethod.c b/src/main/c/jpy_jmethod.c
+index b7cbf03..f91bc35 100644
+--- a/src/main/c/jpy_jmethod.c
++++ b/src/main/c/jpy_jmethod.c
+@@ -589,7 +589,25 @@ typedef struct JPy_MethodFindResult
+ }
+ JPy_MethodFindResult;
+ 
+-JPy_JMethod* JOverloadedMethod_FindMethod0(JNIEnv* jenv, JPy_JOverloadedMethod* overloadedMethod, PyObject* pyArgs, JPy_MethodFindResult* result)
++/**
++ * Returns true if all methods in the overloaded method list are static.
++ */
++static jboolean JOverloadedMethod_AreAllMethodsStatic(JPy_JOverloadedMethod* overloadedMethod)
++{
++    int overloadCount;
++    int i;
++    
++    overloadCount = PyList_Size(overloadedMethod->methodList);
++    for (i = 0; i < overloadCount; i++) {
++        JPy_JMethod* method = (JPy_JMethod*) PyList_GetItem(overloadedMethod->methodList, i);
++        if (!method->isStatic) {
++            return JNI_FALSE;
++        }
++    }
++    return JNI_TRUE;
++}
++
++JPy_JMethod* JOverloadedMethod_FindMethod0(JNIEnv* jenv, JPy_JOverloadedMethod* overloadedMethod, PyObject* pyArgs, jboolean skipInstanceMethods, JPy_MethodFindResult* result)
+ {
+     int overloadCount;
+     int argCount;
+@@ -620,6 +638,10 @@ JPy_JMethod* JOverloadedMethod_FindMethod0(JNIEnv* jenv, JPy_JOverloadedMethod*
+ 
+     for (i = 0; i < overloadCount; i++) {
+         currMethod = (JPy_JMethod*) PyList_GetItem(overloadedMethod->methodList, i);
++        // Skip instance methods when looking for static methods only
++        if (skipInstanceMethods && !currMethod->isStatic) {
++            continue;
++        }
+         matchValue = JMethod_MatchPyArgs(jenv, currMethod, argCount, pyArgs);
+ 
+         JPy_DIAG_PRINT(JPy_DIAG_F_METH, "JOverloadedMethod_FindMethod0: methodList[%d]: paramCount=%d, matchValue=%d\n", i,
+@@ -659,6 +681,7 @@ JPy_JMethod* JOverloadedMethod_FindMethod(JNIEnv* jenv, JPy_JOverloadedMethod* o
+     JPy_MethodFindResult bestResult;
+     JPy_JType* superClass;
+     PyObject* superOM;
++    jboolean skipInstanceMethods;
+ 
+     if ((JPy_DiagFlags & JPy_DIAG_F_METH) != 0) {
+         int i, argCount = PyTuple_Size(pyArgs);
+@@ -673,9 +696,14 @@ JPy_JMethod* JOverloadedMethod_FindMethod(JNIEnv* jenv, JPy_JOverloadedMethod* o
+     bestResult.matchValue = 0;
+     bestResult.matchCount = 0;
+ 
++    // If the original overloaded method contains only static methods, then we are calling
++    // a static method on a class (not an instance method on an object). In this case,
++    // we should not consider instance methods from superclasses.
++    skipInstanceMethods = JOverloadedMethod_AreAllMethodsStatic(overloadedMethod);
++
+     currentOM = overloadedMethod;
+     while (1) {
+-        if (JOverloadedMethod_FindMethod0(jenv, currentOM, pyArgs, &result) < 0) {
++        if (JOverloadedMethod_FindMethod0(jenv, currentOM, pyArgs, skipInstanceMethods, &result) < 0) {
+             // oops, error
+             return NULL;
+         }

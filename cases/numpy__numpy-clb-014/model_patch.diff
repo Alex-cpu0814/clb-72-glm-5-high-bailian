@@ -1,0 +1,14 @@
+diff --git a/numpy/core/src/multiarray/getset.c b/numpy/core/src/multiarray/getset.c
+index bed9240..3d9b282 100644
+--- a/numpy/core/src/multiarray/getset.c
++++ b/numpy/core/src/multiarray/getset.c
+@@ -516,7 +516,8 @@ array_descr_set(PyArrayObject *self, PyObject *arg)
+      */
+     if (newtype->type_num == NPY_VOID &&
+             PyDataType_ISUNSIZED(newtype) &&
+-            newtype->elsize != PyArray_DESCR(self)->elsize) {
++            newtype->elsize != PyArray_DESCR(self)->elsize &&
++            !PyDataType_HASFIELDS(newtype)) {
+         PyArray_DESCR_REPLACE(newtype);
+         if (newtype == NULL) {
+             return -1;

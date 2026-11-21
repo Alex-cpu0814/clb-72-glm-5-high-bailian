@@ -1,0 +1,26 @@
+diff --git a/numpy/core/src/multiarray/compiled_base.c b/numpy/core/src/multiarray/compiled_base.c
+index 1e0c1eb..568b81e 100644
+--- a/numpy/core/src/multiarray/compiled_base.c
++++ b/numpy/core/src/multiarray/compiled_base.c
+@@ -1233,6 +1233,21 @@ arr_unravel_index(PyObject *self, PyObject *args, PyObject *kwds)
+         Py_INCREF(indices);
+     }
+ 
++    /*
++     * Handle the case where the indices array is empty.
++     * In this case, convert to intp to avoid issues with
++     * the iterator's same_kind casting.
++     */
++    if (PyArray_SIZE(indices) == 0 && !PyArray_ISINTEGER(indices)) {
++        PyArrayObject *tmp = (PyArrayObject *)PyArray_FROM_OTF(
++                (PyObject *)indices, NPY_INTP, NPY_ARRAY_FORCECAST);
++        Py_DECREF(indices);
++        indices = tmp;
++        if (indices == NULL) {
++            goto fail;
++        }
++    }
++
+     dtype = PyArray_DescrFromType(NPY_INTP);
+     if (dtype == NULL) {
+         goto fail;

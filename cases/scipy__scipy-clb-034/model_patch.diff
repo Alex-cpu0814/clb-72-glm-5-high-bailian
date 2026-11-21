@@ -1,0 +1,17 @@
+diff --git a/scipy/integrate/odepack.py b/scipy/integrate/odepack.py
+index 2f0d25b..ebdc4db 100644
+--- a/scipy/integrate/odepack.py
++++ b/scipy/integrate/odepack.py
+@@ -227,6 +227,12 @@ def odeint(func, y0, t, args=(), Dfun=None, col_deriv=0, full_output=0,
+         mu = -1  # changed to zero inside function call
+     t = copy(t)
+     y0 = copy(y0)
++    # Check if t values are increasing or decreasing (monotonic)
++    # This is required to avoid issues in the Fortran LSODA code.
++    # For arrays with length > 1, the first two values must be different.
++    if len(t) > 1 and t[1] == t[0]:
++        raise ValueError("The first two elements of the array of times must "
++                         "be different: t[1] == t[0].")
+     output = _odepack.odeint(func, y0, t, args, Dfun, col_deriv, ml, mu,
+                              full_output, rtol, atol, tcrit, h0, hmax, hmin,
+                              ixpr, mxstep, mxhnil, mxordn, mxords,

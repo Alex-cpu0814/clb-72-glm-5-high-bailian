@@ -1,0 +1,25 @@
+diff --git a/src/freetype/ft_layout.c b/src/freetype/ft_layout.c
+index acc6f86..d45d805 100644
+--- a/src/freetype/ft_layout.c
++++ b/src/freetype/ft_layout.c
+@@ -371,6 +371,20 @@ position_glyphs(Layout *ftext)
+ 
+     }
+ 
++
++    /* If the last character has zero bitmap width, such as a trailing space,
++     * extend the boundary to include its advance. This avoids a zero width
++     * boundary for a string of one space, or missing spaces in trailing
++     * space calculations.
++     */
++    if (n_glyphs > 0 && glyph_width == 0) {
++        if (pen.x > max_x) {
++            max_x = pen.x;
++        }
++        if (vertical && pen.y > max_y) {
++            max_y = pen.y;
++        }
++    }
+     fill_text_bounding_box(ftext, pen, min_x, max_x, min_y, max_y, top);
+ }
+ 

@@ -1,0 +1,20 @@
+diff --git a/numpy/core/src/multiarray/compiled_base.c b/numpy/core/src/multiarray/compiled_base.c
+index 88924a8..02e0104 100644
+--- a/numpy/core/src/multiarray/compiled_base.c
++++ b/numpy/core/src/multiarray/compiled_base.c
+@@ -326,6 +326,7 @@ arr_insert(PyObject *NPY_UNUSED(self), PyObject *args, PyObject *kwdict)
+                             "Cannot insert from an empty array!");
+             goto fail;
+         } else {
++            PyArray_DiscardWritebackIfCopy(array);
+             Py_XDECREF(values);
+             Py_XDECREF(mask);
+             Py_XDECREF(array);
+@@ -357,6 +358,7 @@ arr_insert(PyObject *NPY_UNUSED(self), PyObject *args, PyObject *kwdict)
+     Py_RETURN_NONE;
+ 
+  fail:
++    PyArray_DiscardWritebackIfCopy(array);
+     Py_XDECREF(mask);
+     Py_XDECREF(array);
+     Py_XDECREF(values);

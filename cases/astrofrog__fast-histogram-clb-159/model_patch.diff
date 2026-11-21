@@ -1,0 +1,70 @@
+diff --git a/fast_histogram/_histogram_core.c b/fast_histogram/_histogram_core.c
+index 8d4f68b..5370728 100644
+--- a/fast_histogram/_histogram_core.c
++++ b/fast_histogram/_histogram_core.c
+@@ -302,7 +302,8 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
+   do {
+ 
+     /* Get the inner loop data/stride/count values */
+-    npy_intp stride = *strideptr;
++    npy_intp stridex = strideptr[0];
++    npy_intp stridey = strideptr[1];
+     npy_intp size = *innersizeptr;
+ 
+     /* This is a typical inner loop for NPY_ITER_EXTERNAL_LOOP */
+@@ -317,8 +318,8 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args) {
+         count[iy + ny * ix] += 1.;
+       }
+ 
+-      dataptr[0] += stride;
+-      dataptr[1] += stride;
++      dataptr[0] += stridex;
++      dataptr[1] += stridey;
+     }
+ 
+   } while (iternext(iter));
+@@ -451,7 +452,8 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
+   do {
+ 
+     /* Get the inner loop data/stride/count values */
+-    npy_intp stride = *strideptr;
++    npy_intp stridex = strideptr[0];
++    npy_intp stridew = strideptr[1];
+     npy_intp size = *innersizeptr;
+ 
+     /* This is a typical inner loop for NPY_ITER_EXTERNAL_LOOP */
+@@ -465,8 +467,8 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args) {
+         count[ix] += tw;
+       }
+ 
+-      dataptr[0] += stride;
+-      dataptr[1] += stride;
++      dataptr[0] += stridex;
++      dataptr[1] += stridew;
+     }
+ 
+   } while (iternext(iter));
+@@ -610,7 +612,9 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
+   do {
+ 
+     /* Get the inner loop data/stride/count values */
+-    npy_intp stride = *strideptr;
++    npy_intp stridex = strideptr[0];
++    npy_intp stridey = strideptr[1];
++    npy_intp stridew = strideptr[2];
+     npy_intp size = *innersizeptr;
+ 
+     /* This is a typical inner loop for NPY_ITER_EXTERNAL_LOOP */
+@@ -626,9 +630,9 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args) {
+         count[iy + ny * ix] += tw;
+       }
+ 
+-      dataptr[0] += stride;
+-      dataptr[1] += stride;
+-      dataptr[2] += stride;
++      dataptr[0] += stridex;
++      dataptr[1] += stridey;
++      dataptr[2] += stridew;
+     }
+ 
+   } while (iternext(iter));

@@ -1,0 +1,16 @@
+diff --git a/cairo/surface.c b/cairo/surface.c
+index f8fbf11..dc6c543 100644
+--- a/cairo/surface.c
++++ b/cairo/surface.c
+@@ -328,6 +328,11 @@ surface_set_device_scale (PycairoSurface *o, PyObject *args) {
+ 			 &x_scale, &y_scale))
+     return NULL;
+ 
++  if (x_scale == 0 || y_scale == 0) {
++    PyErr_SetString(PyExc_ValueError, "scale must not be zero");
++    return NULL;
++  }
++
+   cairo_surface_set_device_scale (o->surface, x_scale, y_scale);
+   Py_RETURN_NONE;
+ 

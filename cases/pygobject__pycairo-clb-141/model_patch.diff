@@ -1,0 +1,24 @@
+diff --git a/cairo/matrix.c b/cairo/matrix.c
+index 91e8aa1..dfebd82 100644
+--- a/cairo/matrix.c
++++ b/cairo/matrix.c
+@@ -106,9 +106,17 @@ matrix_multiply (PycairoMatrix *o, PyObject *args) {
+ 
+ /* standard matrix multiply, for use by '*' operator */
+ static PyObject *
+-matrix_operator_multiply (PycairoMatrix *o, PycairoMatrix *o2) {
++matrix_operator_multiply (PyObject *o, PyObject *o2) {
+   cairo_matrix_t result;
+-  cairo_matrix_multiply (&result, &o->matrix, &o2->matrix);
++
++  if (!PyObject_TypeCheck(o, &PycairoMatrix_Type) ||
++      !PyObject_TypeCheck(o2, &PycairoMatrix_Type)) {
++    Py_INCREF(Py_NotImplemented);
++    return Py_NotImplemented;
++  }
++
++  cairo_matrix_multiply (&result, &((PycairoMatrix *)o)->matrix,
++			 &((PycairoMatrix *)o2)->matrix);
+   return PycairoMatrix_FromMatrix (&result);
+ }
+ 

@@ -1,0 +1,31 @@
+diff --git a/PIL/PngImagePlugin.py b/PIL/PngImagePlugin.py
+index 2bdf746..ae5c003 100644
+--- a/PIL/PngImagePlugin.py
++++ b/PIL/PngImagePlugin.py
+@@ -572,11 +572,22 @@ def _save(im, fp, filename, chunk=putchunk, check=0):
+                 alpha = b'\xFF' * transparency + b'\0'
+                 chunk(fp, b"tRNS", alpha[:alpha_bytes])
+         elif im.mode == "L":
+-            transparency = max(0, min(65535, transparency))
+-            chunk(fp, b"tRNS", o16(transparency))
++            # transparency is an integer for L mode
++            if isinstance(transparency, bytes):
++                # transparency is a bytes object from a P mode image, 
++                # which cannot be used in L mode. Skip it.
++                pass
++            else:
++                transparency = max(0, min(65535, transparency))
++                chunk(fp, b"tRNS", o16(transparency))
+         elif im.mode == "RGB":
+-            red, green, blue = transparency
+-            chunk(fp, b"tRNS", o16(red) + o16(green) + o16(blue))
++            if isinstance(transparency, bytes):
++                # transparency is a bytes object from a P mode image, 
++                # which cannot be used in RGB mode. Skip it.
++                pass
++            else:
++                red, green, blue = transparency
++                chunk(fp, b"tRNS", o16(red) + o16(green) + o16(blue))
+         else:
+             if "transparency" in im.encoderinfo:
+                 # don't bother with transparency if it's an RGBA

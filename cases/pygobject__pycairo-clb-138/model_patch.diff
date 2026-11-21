@@ -1,0 +1,558 @@
+diff --git a/cairo/cairomodule.c b/cairo/cairomodule.c
+index 04df650..ada8516 100644
+--- a/cairo/cairomodule.c
++++ b/cairo/cairomodule.c
+@@ -236,6 +236,8 @@ PYCAIRO_MOD_INIT(_cairo)
+     return PYCAIRO_MOD_ERROR_VAL;
+   if (PyType_Ready(&PycairoMeshPattern_Type) < 0)
+     return PYCAIRO_MOD_ERROR_VAL;
++  if (PyType_Ready(&PycairoRasterSourcePattern_Type) < 0)
++    return PYCAIRO_MOD_ERROR_VAL;
+ 
+   if (PyType_Ready(&PycairoRectangleInt_Type) < 0)
+     return PYCAIRO_MOD_ERROR_VAL;
+@@ -351,9 +353,12 @@ PYCAIRO_MOD_INIT(_cairo)
+   Py_INCREF(&PycairoRadialGradient_Type);
+   PyModule_AddObject(m, "RadialGradient",
+ 		     (PyObject *)&PycairoRadialGradient_Type);
+-  Py_INCREF(&PycairoRadialGradient_Type);
++  Py_INCREF(&PycairoMeshPattern_Type);
+   PyModule_AddObject(m, "MeshPattern",
+                      (PyObject *)&PycairoMeshPattern_Type);
++  Py_INCREF(&PycairoRasterSourcePattern_Type);
++  PyModule_AddObject(m, "RasterSourcePattern",
++                     (PyObject *)&PycairoRasterSourcePattern_Type);
+ 
+   Py_INCREF(&PycairoRectangleInt_Type);
+   PyModule_AddObject(m, "RectangleInt",  (PyObject *)&PycairoRectangleInt_Type);
+diff --git a/cairo/pattern.c b/cairo/pattern.c
+index d53b261..09e9ebf 100644
+--- a/cairo/pattern.c
++++ b/cairo/pattern.c
+@@ -65,6 +65,9 @@ PycairoPattern_FromPattern (cairo_pattern_t *pattern, PyObject *base) {
+   case CAIRO_PATTERN_TYPE_MESH:
+     type = &PycairoMeshPattern_Type;
+     break;
++  case CAIRO_PATTERN_TYPE_RASTER_SOURCE:
++    type = &PycairoRasterSourcePattern_Type;
++    break;
+   default:
+     type = &PycairoPattern_Type;
+     break;
+@@ -911,3 +914,502 @@ PyTypeObject PycairoMeshPattern_Type = {
+   0,                                  /* tp_is_gc */
+   0,                                  /* tp_bases */
+ };
++
++/* Class RasterSourcePattern ---------------------------------------------- */
++
++typedef struct {
++    PyObject *acquire_callback;
++    PyObject *release_callback;
++    PyObject *snapshot_callback;
++    PyObject *copy_callback;
++    PyObject *finish_callback;
++} RasterSourceCallbacks;
++
++static void
++_raster_source_destroy_callback_data (void *callback_data) {
++  PyGILState_STATE gstate = PyGILState_Ensure();
++  RasterSourceCallbacks *callbacks = (RasterSourceCallbacks *)callback_data;
++  
++  Py_CLEAR(callbacks->acquire_callback);
++  Py_CLEAR(callbacks->release_callback);
++  Py_CLEAR(callbacks->snapshot_callback);
++  Py_CLEAR(callbacks->copy_callback);
++  Py_CLEAR(callbacks->finish_callback);
++  PyMem_Free(callbacks);
++  
++  PyGILState_Release(gstate);
++}
++
++static const cairo_user_data_key_t raster_source_callbacks_key;
++
++static cairo_surface_t *
++_raster_source_acquire_callback (cairo_pattern_t *pattern,
++                                 void *callback_data,
++                                 cairo_surface_t *target,
++                                 const cairo_rectangle_int_t *extents) {
++  RasterSourceCallbacks *callbacks = (RasterSourceCallbacks *)callback_data;
++  PyGILState_STATE gstate;
++  PyObject *result = NULL;
++  PyObject *args = NULL;
++  cairo_surface_t *surface = NULL;
++  
++  if (callbacks->acquire_callback == NULL)
++    return NULL;
++    
++  gstate = PyGILState_Ensure();
++  
++  args = Py_BuildValue("(iiii)",
++                       extents->x, extents->y,
++                       extents->width, extents->height);
++  if (args == NULL)
++    goto done;
++  
++  result = PyObject_CallObject(callbacks->acquire_callback, args);
++  if (result == NULL) {
++    if (PyErr_Occurred())
++      PyErr_Print();
++    goto done;
++  }
++  
++  if (result == Py_None) {
++    /* Return NULL to indicate no surface available */
++    surface = NULL;
++  } else if (PyObject_TypeCheck(result, &PycairoSurface_Type)) {
++    surface = cairo_surface_reference(((PycairoSurface *)result)->surface);
++  } else {
++    PyErr_SetString(PyExc_TypeError,
++                    "acquire callback should return a Surface or None");
++    PyErr_Print();
++    surface = NULL;
++  }
++  
++done:
++  Py_XDECREF(result);
++  Py_XDECREF(args);
++  PyGILState_Release(gstate);
++  return surface;
++}
++
++static void
++_raster_source_release_callback (cairo_pattern_t *pattern,
++                                 void *callback_data,
++                                 cairo_surface_t *surface) {
++  RasterSourceCallbacks *callbacks = (RasterSourceCallbacks *)callback_data;
++  PyGILState_STATE gstate;
++  PyObject *result = NULL;
++  PyObject *py_surface = NULL;
++  
++  if (callbacks->release_callback == NULL) {
++    cairo_surface_destroy(surface);
++    return;
++  }
++  
++  gstate = PyGILState_Ensure();
++  
++  py_surface = PycairoSurface_FromSurface(
++    cairo_surface_reference(surface), NULL);
++  if (py_surface == NULL) {
++    if (PyErr_Occurred())
++      PyErr_Print();
++    goto done;
++  }
++  
++  result = PyObject_CallFunctionObjArgs(callbacks->release_callback,
++                                        py_surface, NULL);
++  if (result == NULL) {
++    if (PyErr_Occurred())
++      PyErr_Print();
++  }
++  
++done:
++  cairo_surface_destroy(surface);
++  Py_XDECREF(result);
++  Py_XDECREF(py_surface);
++  PyGILState_Release(gstate);
++}
++
++static cairo_status_t
++_raster_source_snapshot_callback (cairo_pattern_t *pattern,
++                                  void *callback_data) {
++  RasterSourceCallbacks *callbacks = (RasterSourceCallbacks *)callback_data;
++  PyGILState_STATE gstate;
++  PyObject *result = NULL;
++  cairo_status_t status = CAIRO_STATUS_SUCCESS;
++  
++  if (callbacks->snapshot_callback == NULL)
++    return CAIRO_STATUS_SUCCESS;
++  
++  gstate = PyGILState_Ensure();
++  
++  result = PyObject_CallObject(callbacks->snapshot_callback, NULL);
++  if (result == NULL) {
++    if (PyErr_Occurred())
++      PyErr_Print();
++    status = CAIRO_STATUS_USER_FONT_ERROR;
++  }
++  
++  Py_XDECREF(result);
++  PyGILState_Release(gstate);
++  return status;
++}
++
++static cairo_status_t
++_raster_source_copy_callback (cairo_pattern_t *pattern,
++                              void *callback_data,
++                              const cairo_pattern_t *other) {
++  RasterSourceCallbacks *callbacks = (RasterSourceCallbacks *)callback_data;
++  PyGILState_STATE gstate;
++  PyObject *result = NULL;
++  cairo_status_t status = CAIRO_STATUS_SUCCESS;
++  
++  if (callbacks->copy_callback == NULL)
++    return CAIRO_STATUS_SUCCESS;
++  
++  gstate = PyGILState_Ensure();
++  
++  result = PyObject_CallObject(callbacks->copy_callback, NULL);
++  if (result == NULL) {
++    if (PyErr_Occurred())
++      PyErr_Print();
++    status = CAIRO_STATUS_USER_FONT_ERROR;
++  }
++  
++  Py_XDECREF(result);
++  PyGILState_Release(gstate);
++  return status;
++}
++
++static void
++_raster_source_finish_callback (cairo_pattern_t *pattern,
++                                void *callback_data) {
++  RasterSourceCallbacks *callbacks = (RasterSourceCallbacks *)callback_data;
++  PyGILState_STATE gstate;
++  PyObject *result = NULL;
++  
++  if (callbacks->finish_callback == NULL)
++    return;
++  
++  gstate = PyGILState_Ensure();
++  
++  result = PyObject_CallObject(callbacks->finish_callback, NULL);
++  if (result == NULL) {
++    if (PyErr_Occurred())
++      PyErr_Print();
++  }
++  
++  Py_XDECREF(result);
++  PyGILState_Release(gstate);
++}
++
++static PyObject *
++raster_source_pattern_new (PyTypeObject *type, PyObject *args, PyObject *kwds) {
++  int content, width, height;
++  cairo_pattern_t *pattern;
++  RasterSourceCallbacks *callbacks;
++  
++  if (!PyArg_ParseTuple(args, "iii:RasterSourcePattern.__new__",
++                        &content, &width, &height))
++    return NULL;
++  
++  callbacks = PyMem_Malloc(sizeof(RasterSourceCallbacks));
++  if (callbacks == NULL) {
++    PyErr_NoMemory();
++    return NULL;
++  }
++  
++  callbacks->acquire_callback = NULL;
++  callbacks->release_callback = NULL;
++  callbacks->snapshot_callback = NULL;
++  callbacks->copy_callback = NULL;
++  callbacks->finish_callback = NULL;
++  
++  pattern = cairo_pattern_create_raster_source(callbacks, content, width, height);
++  if (cairo_pattern_status(pattern) != CAIRO_STATUS_SUCCESS) {
++    PyMem_Free(callbacks);
++    return PycairoPattern_FromPattern(pattern, NULL);
++  }
++  
++  /* Set user data to track the callbacks lifetime */
++  cairo_status_t status = cairo_pattern_set_user_data(
++    pattern, &raster_source_callbacks_key, callbacks,
++    _raster_source_destroy_callback_data);
++  
++  if (status != CAIRO_STATUS_SUCCESS) {
++    cairo_pattern_destroy(pattern);
++    PyMem_Free(callbacks);
++    Pycairo_Check_Status(status);
++    return NULL;
++  }
++  
++  return PycairoPattern_FromPattern(pattern, NULL);
++}
++
++static PyObject *
++raster_source_pattern_set_acquire (PycairoPattern *obj, PyObject *args) {
++  PyObject *acquire, *release;
++  RasterSourceCallbacks *callbacks;
++  
++  if (!PyArg_ParseTuple(args, "OO:RasterSourcePattern.set_acquire",
++                        &acquire, &release))
++    return NULL;
++  
++  if (acquire != Py_None && !PyCallable_Check(acquire)) {
++    PyErr_SetString(PyExc_TypeError, "acquire must be callable or None");
++    return NULL;
++  }
++  
++  if (release != Py_None && !PyCallable_Check(release)) {
++    PyErr_SetString(PyExc_TypeError, "release must be callable or None");
++    return NULL;
++  }
++  
++  callbacks = cairo_raster_source_pattern_get_callback_data(obj->pattern);
++  if (callbacks == NULL) {
++    PyErr_SetString(PyExc_RuntimeError, "No callback data");
++    return NULL;
++  }
++  
++  Py_CLEAR(callbacks->acquire_callback);
++  Py_CLEAR(callbacks->release_callback);
++  
++  if (acquire != Py_None) {
++    callbacks->acquire_callback = acquire;
++    Py_INCREF(acquire);
++  }
++  
++  if (release != Py_None) {
++    callbacks->release_callback = release;
++    Py_INCREF(release);
++  }
++  
++  cairo_raster_source_pattern_set_acquire(obj->pattern,
++                                          _raster_source_acquire_callback,
++                                          _raster_source_release_callback);
++  
++  Py_RETURN_NONE;
++}
++
++static PyObject *
++raster_source_pattern_get_acquire (PycairoPattern *obj) {
++  RasterSourceCallbacks *callbacks;
++  PyObject *acquire, *release;
++  
++  callbacks = cairo_raster_source_pattern_get_callback_data(obj->pattern);
++  if (callbacks == NULL) {
++    PyErr_SetString(PyExc_RuntimeError, "No callback data");
++    return NULL;
++  }
++  
++  acquire = callbacks->acquire_callback ? callbacks->acquire_callback : Py_None;
++  release = callbacks->release_callback ? callbacks->release_callback : Py_None;
++  
++  Py_INCREF(acquire);
++  Py_INCREF(release);
++  return Py_BuildValue("(OO)", acquire, release);
++}
++
++static PyObject *
++raster_source_pattern_set_snapshot (PycairoPattern *obj, PyObject *args) {
++  PyObject *snapshot;
++  RasterSourceCallbacks *callbacks;
++  
++  if (!PyArg_ParseTuple(args, "O:RasterSourcePattern.set_snapshot",
++                        &snapshot))
++    return NULL;
++  
++  if (snapshot != Py_None && !PyCallable_Check(snapshot)) {
++    PyErr_SetString(PyExc_TypeError, "snapshot must be callable or None");
++    return NULL;
++  }
++  
++  callbacks = cairo_raster_source_pattern_get_callback_data(obj->pattern);
++  if (callbacks == NULL) {
++    PyErr_SetString(PyExc_RuntimeError, "No callback data");
++    return NULL;
++  }
++  
++  Py_CLEAR(callbacks->snapshot_callback);
++  
++  if (snapshot != Py_None) {
++    callbacks->snapshot_callback = snapshot;
++    Py_INCREF(snapshot);
++    cairo_raster_source_pattern_set_snapshot(obj->pattern,
++                                             _raster_source_snapshot_callback);
++  } else {
++    cairo_raster_source_pattern_set_snapshot(obj->pattern, NULL);
++  }
++  
++  Py_RETURN_NONE;
++}
++
++static PyObject *
++raster_source_pattern_get_snapshot (PycairoPattern *obj) {
++  RasterSourceCallbacks *callbacks;
++  PyObject *snapshot;
++  
++  callbacks = cairo_raster_source_pattern_get_callback_data(obj->pattern);
++  if (callbacks == NULL) {
++    PyErr_SetString(PyExc_RuntimeError, "No callback data");
++    return NULL;
++  }
++  
++  snapshot = callbacks->snapshot_callback ? callbacks->snapshot_callback : Py_None;
++  Py_INCREF(snapshot);
++  return snapshot;
++}
++
++static PyObject *
++raster_source_pattern_set_copy (PycairoPattern *obj, PyObject *args) {
++  PyObject *copy;
++  RasterSourceCallbacks *callbacks;
++  
++  if (!PyArg_ParseTuple(args, "O:RasterSourcePattern.set_copy",
++                        &copy))
++    return NULL;
++  
++  if (copy != Py_None && !PyCallable_Check(copy)) {
++    PyErr_SetString(PyExc_TypeError, "copy must be callable or None");
++    return NULL;
++  }
++  
++  callbacks = cairo_raster_source_pattern_get_callback_data(obj->pattern);
++  if (callbacks == NULL) {
++    PyErr_SetString(PyExc_RuntimeError, "No callback data");
++    return NULL;
++  }
++  
++  Py_CLEAR(callbacks->copy_callback);
++  
++  if (copy != Py_None) {
++    callbacks->copy_callback = copy;
++    Py_INCREF(copy);
++    cairo_raster_source_pattern_set_copy(obj->pattern,
++                                         _raster_source_copy_callback);
++  } else {
++    cairo_raster_source_pattern_set_copy(obj->pattern, NULL);
++  }
++  
++  Py_RETURN_NONE;
++}
++
++static PyObject *
++raster_source_pattern_get_copy (PycairoPattern *obj) {
++  RasterSourceCallbacks *callbacks;
++  PyObject *copy;
++  
++  callbacks = cairo_raster_source_pattern_get_callback_data(obj->pattern);
++  if (callbacks == NULL) {
++    PyErr_SetString(PyExc_RuntimeError, "No callback data");
++    return NULL;
++  }
++  
++  copy = callbacks->copy_callback ? callbacks->copy_callback : Py_None;
++  Py_INCREF(copy);
++  return copy;
++}
++
++static PyObject *
++raster_source_pattern_set_finish (PycairoPattern *obj, PyObject *args) {
++  PyObject *finish;
++  RasterSourceCallbacks *callbacks;
++  
++  if (!PyArg_ParseTuple(args, "O:RasterSourcePattern.set_finish",
++                        &finish))
++    return NULL;
++  
++  if (finish != Py_None && !PyCallable_Check(finish)) {
++    PyErr_SetString(PyExc_TypeError, "finish must be callable or None");
++    return NULL;
++  }
++  
++  callbacks = cairo_raster_source_pattern_get_callback_data(obj->pattern);
++  if (callbacks == NULL) {
++    PyErr_SetString(PyExc_RuntimeError, "No callback data");
++    return NULL;
++  }
++  
++  Py_CLEAR(callbacks->finish_callback);
++  
++  if (finish != Py_None) {
++    callbacks->finish_callback = finish;
++    Py_INCREF(finish);
++    cairo_raster_source_pattern_set_finish(obj->pattern,
++                                           _raster_source_finish_callback);
++  } else {
++    cairo_raster_source_pattern_set_finish(obj->pattern, NULL);
++  }
++  
++  Py_RETURN_NONE;
++}
++
++static PyObject *
++raster_source_pattern_get_finish (PycairoPattern *obj) {
++  RasterSourceCallbacks *callbacks;
++  PyObject *finish;
++  
++  callbacks = cairo_raster_source_pattern_get_callback_data(obj->pattern);
++  if (callbacks == NULL) {
++    PyErr_SetString(PyExc_RuntimeError, "No callback data");
++    return NULL;
++  }
++  
++  finish = callbacks->finish_callback ? callbacks->finish_callback : Py_None;
++  Py_INCREF(finish);
++  return finish;
++}
++
++static PyMethodDef raster_source_pattern_methods[] = {
++  {"set_acquire", (PyCFunction)raster_source_pattern_set_acquire, METH_VARARGS},
++  {"get_acquire", (PyCFunction)raster_source_pattern_get_acquire, METH_NOARGS},
++  {"set_snapshot", (PyCFunction)raster_source_pattern_set_snapshot, METH_VARARGS},
++  {"get_snapshot", (PyCFunction)raster_source_pattern_get_snapshot, METH_NOARGS},
++  {"set_copy", (PyCFunction)raster_source_pattern_set_copy, METH_VARARGS},
++  {"get_copy", (PyCFunction)raster_source_pattern_get_copy, METH_NOARGS},
++  {"set_finish", (PyCFunction)raster_source_pattern_set_finish, METH_VARARGS},
++  {"get_finish", (PyCFunction)raster_source_pattern_get_finish, METH_NOARGS},
++  {NULL, NULL, 0, NULL},
++};
++
++PyTypeObject PycairoRasterSourcePattern_Type = {
++  PyVarObject_HEAD_INIT(NULL, 0)
++  "cairo.RasterSourcePattern",       /* tp_name */
++  sizeof(PycairoPattern),            /* tp_basicsize */
++  0,                                  /* tp_itemsize */
++  0,                                  /* tp_dealloc */
++  0,                                  /* tp_print */
++  0,                                  /* tp_getattr */
++  0,                                  /* tp_setattr */
++  0,                                  /* tp_compare */
++  0,                                  /* tp_repr */
++  0,                                  /* tp_as_number */
++  0,                                  /* tp_as_sequence */
++  0,                                  /* tp_as_mapping */
++  0,                                  /* tp_hash */
++  0,                                  /* tp_call */
++  0,                                  /* tp_str */
++  0,                                  /* tp_getattro */
++  0,                                  /* tp_setattro */
++  0,                                  /* tp_as_buffer */
++  Py_TPFLAGS_DEFAULT,                 /* tp_flags */
++  0,                                  /* tp_doc */
++  0,                                  /* tp_traverse */
++  0,                                  /* tp_clear */
++  0,                                  /* tp_richcompare */
++  0,                                  /* tp_weaklistoffset */
++  0,                                  /* tp_iter */
++  0,                                  /* tp_iternext */
++  raster_source_pattern_methods,      /* tp_methods */
++  0,                                  /* tp_members */
++  0,                                  /* tp_getset */
++  &PycairoPattern_Type,               /* tp_base */
++  0,                                  /* tp_dict */
++  0,                                  /* tp_descr_get */
++  0,                                  /* tp_descr_set */
++  0,                                  /* tp_dictoffset */
++  0,                                  /* tp_init */
++  0,                                  /* tp_alloc */
++  (newfunc)raster_source_pattern_new, /* tp_new */
++  0,                                  /* tp_free */
++  0,                                  /* tp_is_gc */
++  0,                                  /* tp_bases */
++};
+diff --git a/cairo/private.h b/cairo/private.h
+index c031555..7ed5149 100644
+--- a/cairo/private.h
++++ b/cairo/private.h
+@@ -79,6 +79,9 @@ PyObject *PycairoPattern_FromPattern (cairo_pattern_t *pattern,
+ typedef PycairoPattern PycairoMeshPattern;
+ extern PyTypeObject PycairoMeshPattern_Type;
+ 
++typedef PycairoPattern PycairoRasterSourcePattern;
++extern PyTypeObject PycairoRasterSourcePattern_Type;
++
+ extern PyTypeObject PycairoRectangleInt_Type;
+ PyObject *PycairoRectangleInt_FromRectangleInt (
+     const cairo_rectangle_int_t *rectangle_int);

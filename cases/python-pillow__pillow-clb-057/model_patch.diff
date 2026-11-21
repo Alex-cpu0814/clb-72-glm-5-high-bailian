@@ -1,0 +1,84 @@
+diff --git a/src/PIL/PsdImagePlugin.py b/src/PIL/PsdImagePlugin.py
+index e7b8846..a6eddbe 100644
+--- a/src/PIL/PsdImagePlugin.py
++++ b/src/PIL/PsdImagePlugin.py
+@@ -22,6 +22,7 @@ from . import Image, ImageFile, ImagePalette
+ from ._binary import i8
+ from ._binary import i16be as i16
+ from ._binary import i32be as i32
++from ._binary import si16be
+ 
+ MODES = {
+     # (photoshop mode, bits) -> (pil mode, required channels)
+@@ -179,7 +180,7 @@ def _layerinfo(fp, ct_bytes):
+     def read(size):
+         return ImageFile._safe_read(fp, size)
+ 
+-    ct = i16(read(2))
++    ct = si16be(read(2))
+ 
+     # sanity check
+     if ct_bytes < (abs(ct) * 20):
+diff --git a/src/PIL/_binary.py b/src/PIL/_binary.py
+index 5564f45..e556911 100644
+--- a/src/PIL/_binary.py
++++ b/src/PIL/_binary.py
+@@ -1,10 +1,10 @@
+ #
+-# The Python Imaging Library.
++# The Python Imaging Library
+ # $Id$
+ #
+ # Binary input/output support routines.
+ #
+-# Copyright (c) 1997-2003 by Secret Labs AB
++# Copyright (c) 1997-2003 by Secret Labs AB.
+ # Copyright (c) 1995-2003 by Fredrik Lundh
+ # Copyright (c) 2012 by Brian Crowell
+ #
+@@ -68,13 +68,45 @@ def si32le(c, o=0):
+ 
+ 
+ def i16be(c, o=0):
++    """
++    Converts a 2-bytes (16 bits) string to an unsigned integer (big-endian).
++
++    :param c: string containing bytes to convert
++    :param o: offset of bytes to convert in string
++    """
+     return unpack_from(">H", c, o)[0]
+ 
+ 
++def si16be(c, o=0):
++    """
++    Converts a 2-bytes (16 bits) string to a signed integer (big-endian).
++
++    :param c: string containing bytes to convert
++    :param o: offset of bytes to convert in string
++    """
++    return unpack_from(">h", c, o)[0]
++
++
+ def i32be(c, o=0):
++    """
++    Converts a 4-bytes (32 bits) string to an unsigned integer (big-endian).
++
++    :param c: string containing bytes to convert
++    :param o: offset of bytes to convert in string
++    """
+     return unpack_from(">I", c, o)[0]
+ 
+ 
++def si32be(c, o=0):
++    """
++    Converts a 4-bytes (32 bits) string to a signed integer (big-endian).
++
++    :param c: string containing bytes to convert
++    :param o: offset of bytes to convert in string
++    """
++    return unpack_from(">i", c, o)[0]
++
++
+ # Output, le = little endian, be = big endian
+ def o16le(i):
+     return pack("<H", i)

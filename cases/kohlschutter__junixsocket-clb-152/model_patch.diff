@@ -1,0 +1,194 @@
+diff --git a/junixsocket-native/src/main/c/bind.c b/junixsocket-native/src/main/c/bind.c
+index 9c939e4..ae80512 100644
+--- a/junixsocket-native/src/main/c/bind.c
++++ b/junixsocket-native/src/main/c/bind.c
+@@ -44,7 +44,7 @@ JNIEXPORT jlong JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_bind(
+     }
+ 
+     int serverHandle = _getFD(env, fd);
+-    if(serverHandle <= 0) {
++    if(serverHandle < 0) {
+         _throwException(env, kExceptionSocketException, "Socket closed");
+         return -1;
+     }
+diff --git a/junixsocket-native/src/main/c/connect.c b/junixsocket-native/src/main/c/connect.c
+index 49353c6..5c59d68 100644
+--- a/junixsocket-native/src/main/c/connect.c
++++ b/junixsocket-native/src/main/c/connect.c
+@@ -41,7 +41,7 @@ JNIEXPORT jboolean JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_connect(
+     }
+ 
+     int socketHandle = _getFD(env, fd);
+-    if(socketHandle <= 0) {
++    if(socketHandle < 0) {
+         _throwException(env, kExceptionSocketException, "Socket closed");
+         return false;
+     }
+@@ -91,7 +91,7 @@ JNIEXPORT jboolean JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_connect(
+ JNIEXPORT void JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_disconnect
+ (JNIEnv *env, jclass clazz CK_UNUSED, jobject fd) {
+     int sockfd = _getFD(env, fd);
+-    if(sockfd <= 0) {
++    if(sockfd < 0) {
+         _throwException(env, kExceptionSocketException, "Socket closed");
+         return;
+     }
+@@ -122,7 +122,7 @@ JNIEXPORT void JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_disconnect
+ JNIEXPORT jboolean JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_finishConnect
+  (JNIEnv *env, jclass clazz CK_UNUSED, jobject fd) {
+      int socketHandle = _getFD(env, fd);
+-     if(socketHandle <= 0) {
++     if(socketHandle < 0) {
+          _throwException(env, kExceptionSocketException, "Socket closed");
+          return false;
+      }
+diff --git a/junixsocket-native/src/main/c/filedescriptors.c b/junixsocket-native/src/main/c/filedescriptors.c
+index a9031e9..05e9bcd 100644
+--- a/junixsocket-native/src/main/c/filedescriptors.c
++++ b/junixsocket-native/src/main/c/filedescriptors.c
+@@ -135,7 +135,7 @@ void _initHandle(JNIEnv * env, jobject fd, jlong handle)
+ int _closeFd(JNIEnv * env, jobject fd, int handle)
+ {
+     int ret = 0;
+-    if(handle > 0) {
++    if(handle >= 0) {
+         shutdown(handle, SHUT_RDWR);
+ #if defined(_WIN32)
+         ret = closesocket(handle);
+@@ -154,14 +154,14 @@ int _closeFd(JNIEnv * env, jobject fd, int handle)
+ #endif
+     (*env)->MonitorExit(env, fd);
+ 
+-    if(handle > 0) {
+-        if(fdHandle > 0 && handle != fdHandle) {
++    if(handle >= 0) {
++        if(fdHandle >= 0 && handle != fdHandle) {
+ #if DEBUG
+             fprintf(stderr, "NativeUnixSocket_closeFd inconsistency: handle %i vs fdHandle %i\n", handle, fdHandle);
+             fflush(stderr);
+ #endif
+         }
+-    } else if(fdHandle > 0) {
++    } else if(fdHandle >= 0) {
+         shutdown(fdHandle, SHUT_RDWR);
+ #if defined(_WIN32)
+         ret = closesocket(fdHandle);
+@@ -288,7 +288,7 @@ JNIEXPORT jclass JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_primaryType
+      }
+ 
+      int handle = _getFD(env, fd);
+-     if(handle <= 0) {
++     if(handle < 0) {
+ #if defined(_WIN32)
+          jlong handleWin = _getHandle(env, fd);
+          if(handleWin != -1) {
+diff --git a/junixsocket-native/src/main/c/polling.c b/junixsocket-native/src/main/c/polling.c
+index ffbb512..b981ca0 100644
+--- a/junixsocket-native/src/main/c/polling.c
++++ b/junixsocket-native/src/main/c/polling.c
+@@ -239,7 +239,7 @@ JNIEXPORT jint JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_available(
+                                                                              JNIEnv * env, jclass clazz CK_UNUSED, jobject fd)
+ {
+     int handle = _getFD(env, fd);
+-    if (handle <= 0) {
++    if (handle < 0) {
+         _throwException(env, kExceptionSocketException, "Socket closed");
+         return 0;
+     }
+diff --git a/junixsocket-native/src/main/c/receive.c b/junixsocket-native/src/main/c/receive.c
+index 090b8c3..9f08a84 100644
+--- a/junixsocket-native/src/main/c/receive.c
++++ b/junixsocket-native/src/main/c/receive.c
+@@ -261,7 +261,7 @@ JNIEXPORT jint JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_receive
+     CK_ARGUMENT_POTENTIALLY_UNUSED(hardTimeoutMillis);
+ 
+     int handle = _getFD(env, fd);
+-    if (handle <= 0) {
++    if (handle < 0) {
+         _throwException(env, kExceptionSocketException, "Socket closed");
+         return -1;
+     }
+diff --git a/junixsocket-native/src/main/c/send.c b/junixsocket-native/src/main/c/send.c
+index f58c268..2db716d 100644
+--- a/junixsocket-native/src/main/c/send.c
++++ b/junixsocket-native/src/main/c/send.c
+@@ -198,7 +198,7 @@ JNIEXPORT jint JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_write(
+ JNIEXPORT jint JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_send
+ (JNIEnv *env, jclass clazz CK_UNUSED, jobject fd, jobject buffer, jint offset, jint length, jobject addressBuffer, jint opt, jobject ancSupp) {
+     int handle = _getFD(env, fd);
+-    if (handle <= 0) {
++    if (handle < 0) {
+         _throwException(env, kExceptionSocketException, "Socket closed");
+         return 0;
+     }
+diff --git a/junixsocket-native/src/main/c/socket.c b/junixsocket-native/src/main/c/socket.c
+index d476f29..48ef52f 100644
+--- a/junixsocket-native/src/main/c/socket.c
++++ b/junixsocket-native/src/main/c/socket.c
+@@ -44,7 +44,7 @@ int sockTypeToNative(JNIEnv *env, int type) {
+ JNIEXPORT void JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_createSocket
+ (JNIEnv * env, jclass clazz CK_UNUSED, jobject fd, jint type) {
+     int handle = _getFD(env, fd);
+-    if(handle > 0) {
++    if(handle >= 0) {
+         // already initialized
+         _throwException(env, kExceptionSocketException, "Already created");
+         return;
+@@ -59,7 +59,7 @@ JNIEXPORT void JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_createSocket
+     handle = socket(AF_UNIX, type | SOCK_CLOEXEC, 0);
+     if(handle == -1 && errno == EPROTONOSUPPORT) {
+         handle = socket(AF_UNIX, type, 0);
+-        if(handle > 0) {
++        if(handle >= 0) {
+ #  if defined(FD_CLOEXEC)
+             fcntl(handle, F_SETFD, FD_CLOEXEC); // best effort
+ #  endif
+@@ -68,7 +68,7 @@ JNIEXPORT void JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_createSocket
+ #else
+     handle = socket(AF_UNIX, type, 0);
+ #endif
+-    if(handle <= 0) {
++    if(handle < 0) {
+         _throwErrnumException(env, socket_errno, fd);
+         return;
+     }
+@@ -95,7 +95,7 @@ JNIEXPORT void JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_createSocket
+ JNIEXPORT jint JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_socketStatus
+  (JNIEnv *env, jclass clazz CK_UNUSED, jobject fd) {
+      int handle = _getFD(env, fd);
+-     if(handle <= 0) {
++     if(handle < 0) {
+          return org_newsclub_net_unix_NativeUnixSocket_SOCKETSTATUS_INVALID;
+      }
+      struct sockaddr_un addr = {0};
+diff --git a/junixsocket-native/src/main/c/socketpair.c b/junixsocket-native/src/main/c/socketpair.c
+index 24e8961..aaa2879 100644
+--- a/junixsocket-native/src/main/c/socketpair.c
++++ b/junixsocket-native/src/main/c/socketpair.c
+@@ -31,7 +31,7 @@ JNIEXPORT void JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_socketPair
+ //    return;
+ 
+     int handleListen = socket(AF_INET, type, 0);
+-    if(handleListen <= 0) {
++    if(handleListen < 0) {
+         _throwErrnumException(env, socket_errno, NULL);
+         return;
+     }
+@@ -63,7 +63,7 @@ JNIEXPORT void JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_socketPair
+     }
+ 
+     int handleConnect = socket(AF_INET, type, 0);
+-    if(handleConnect <= 0) {
++    if(handleConnect < 0) {
+         _throwErrnumException(env, socket_errno, NULL);
+         return;
+     }
+@@ -85,7 +85,7 @@ JNIEXPORT void JNICALL Java_org_newsclub_net_unix_NativeUnixSocket_socketPair
+ 
+     len = sizeof(struct sockaddr_in);
+     int handleAccept = accept(handleListen, (struct sockaddr *)&addr, &len);
+-    if(handleAccept <= 0) {
++    if(handleAccept < 0) {
+         _throwErrnumException(env, socket_errno, NULL);
+         return;
+     }

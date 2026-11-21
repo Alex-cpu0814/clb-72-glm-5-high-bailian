@@ -1,0 +1,31 @@
+diff --git a/junixsocket-common/src/main/java/org/newsclub/net/unix/AFCore.java b/junixsocket-common/src/main/java/org/newsclub/net/unix/AFCore.java
+index 7df1083..20a5c7d 100644
+--- a/junixsocket-common/src/main/java/org/newsclub/net/unix/AFCore.java
++++ b/junixsocket-common/src/main/java/org/newsclub/net/unix/AFCore.java
+@@ -130,9 +130,10 @@ class AFCore extends CleanableState {
+     }
+ 
+     int pos = dst.position();
++    boolean isDirect = dst.isDirect();
+ 
+-    int count = NativeUnixSocket.receive(fdesc, buf, pos, remaining, socketAddressBuffer, options,
+-        ancillaryDataSupport, 0);
++    int count = NativeUnixSocket.receive(fdesc, buf, isDirect ? pos : 0, remaining, socketAddressBuffer,
++        options, ancillaryDataSupport, 0);
+     if (count == -1) {
+       return count;
+     }
+@@ -207,7 +208,12 @@ class AFCore extends CleanableState {
+ 
+     int written = NativeUnixSocket.send(fdesc, buf, bufPos, remaining, addressTo, addressToLen,
+         options, ancillaryDataSupport);
+-    src.position(pos + written);
++    // For non-direct buffers, we've already copied "remaining" bytes from the source
++    // to the thread-local buffer (the "buf.put(src)" call above already advanced the position).
++    // We need to advance the position by "remaining", not "written", to avoid data corruption
++    // (if written < remaining, the same data would be sent again on the next call).
++    // For direct buffers, the native code reads directly from the buffer, so we advance by "written".
++    src.position(pos + (isDirect ? written : remaining));
+ 
+     return written;
+   }

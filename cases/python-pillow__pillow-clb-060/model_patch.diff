@@ -1,0 +1,76 @@
+diff --git a/src/libImaging/Fill.c b/src/libImaging/Fill.c
+index e4e4b43..b4106ff 100644
+--- a/src/libImaging/Fill.c
++++ b/src/libImaging/Fill.c
+@@ -76,8 +76,26 @@ ImagingFillLinearGradient(const char *mode) {
+         return NULL;
+     }
+ 
+-    for (y = 0; y < 256; y++) {
+-        memset(im->image8[y], (unsigned char)y, 256);
++    if (im->image32) {
++        /* 32-bit images (F, I, etc.) */
++        for (y = 0; y < 256; y++) {
++            int x;
++            if (im->type == IMAGING_TYPE_FLOAT32) {
++                for (x = 0; x < 256; x++) {
++                    IMAGING_PIXEL_FLOAT32(im, x, y) = (FLOAT32)y;
++                }
++            } else {
++                /* INT32 */
++                for (x = 0; x < 256; x++) {
++                    im->image32[y][x] = y;
++                }
++            }
++        }
++    } else {
++        /* 8-bit images (L, 1, P) */
++        for (y = 0; y < 256; y++) {
++            memset(im->image8[y], (unsigned char)y, 256);
++        }
+     }
+ 
+     return im;
+@@ -98,14 +116,34 @@ ImagingFillRadialGradient(const char *mode) {
+         return NULL;
+     }
+ 
+-    for (y = 0; y < 256; y++) {
+-        for (x = 0; x < 256; x++) {
+-            d = (int)sqrt(
+-                (double)((x - 128) * (x - 128) + (y - 128) * (y - 128)) * 2.0);
+-            if (d >= 255) {
+-                im->image8[y][x] = 255;
+-            } else {
+-                im->image8[y][x] = d;
++    if (im->image32) {
++        /* 32-bit images (F, I, etc.) */
++        for (y = 0; y < 256; y++) {
++            for (x = 0; x < 256; x++) {
++                d = (int)sqrt(
++                    (double)((x - 128) * (x - 128) + (y - 128) * (y - 128)) * 2.0);
++                if (d >= 255) {
++                    d = 255;
++                }
++                if (im->type == IMAGING_TYPE_FLOAT32) {
++                    IMAGING_PIXEL_FLOAT32(im, x, y) = (FLOAT32)d;
++                } else {
++                    /* INT32 */
++                    im->image32[y][x] = d;
++                }
++            }
++        }
++    } else {
++        /* 8-bit images (L, 1, P) */
++        for (y = 0; y < 256; y++) {
++            for (x = 0; x < 256; x++) {
++                d = (int)sqrt(
++                    (double)((x - 128) * (x - 128) + (y - 128) * (y - 128)) * 2.0);
++                if (d >= 255) {
++                    im->image8[y][x] = 255;
++                } else {
++                    im->image8[y][x] = d;
++                }
+             }
+         }
+     }

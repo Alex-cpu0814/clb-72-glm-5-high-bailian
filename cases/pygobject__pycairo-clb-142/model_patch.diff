@@ -1,0 +1,80 @@
+diff --git a/cairo/surface.c b/cairo/surface.c
+index bf86774..05f0699 100644
+--- a/cairo/surface.c
++++ b/cairo/surface.c
+@@ -765,22 +765,7 @@ image_surface_format_stride_for_width (PyObject *self, PyObject *args) {
+ static PyObject *
+ image_surface_get_data (PycairoImageSurface *o) {
+ #if PY_MAJOR_VERSION >= 3
+-  Py_buffer view;
+-  cairo_surface_t *surface;
+-  int height, stride;
+-  unsigned char * buffer;
+-
+-  surface = o->surface;
+-  buffer = cairo_image_surface_get_data (surface);
+-  if (buffer == NULL) {
+-    Py_RETURN_NONE;
+-  }
+-  height = cairo_image_surface_get_height (surface);
+-  stride = cairo_image_surface_get_stride (surface);
+-  if (PyBuffer_FillInfo (&view, (PyObject *)o, buffer, height * stride, 0, 0) < 0)
+-    return NULL;
+-
+-  return PyMemoryView_FromBuffer (&view);
++  return PyMemoryView_FromObject((PyObject *)o);
+ #else
+   return PyBuffer_FromReadWriteObject((PyObject *)o, 0, Py_END_OF_BUFFER);
+ #endif
+@@ -880,6 +865,39 @@ static PyBufferProcs image_surface_as_buffer = {
+ };
+ #endif
+ 
++#if PY_MAJOR_VERSION >= 3
++static int
++image_surface_getbuffer (PyObject *obj, Py_buffer *view, int flags) {
++  PycairoImageSurface *o = (PycairoImageSurface *)obj;
++  cairo_surface_t *surface = o->surface;
++  unsigned char *buffer;
++  int height, stride;
++  Py_ssize_t size;
++
++  buffer = cairo_image_surface_get_data (surface);
++  if (buffer == NULL) {
++    PyErr_SetString(PyExc_ValueError, "surface has no data");
++    return -1;
++  }
++  height = cairo_image_surface_get_height (surface);
++  stride = cairo_image_surface_get_stride (surface);
++  size = (Py_ssize_t)height * stride;
++
++  return PyBuffer_FillInfo(view, obj, buffer, size, 0, flags);
++}
++
++static void
++image_surface_releasebuffer (PyObject *obj, Py_buffer *view) {
++  /* Nothing to do since we don't export any additional info */
++}
++
++static PyBufferProcs image_surface_as_buffer = {
++  image_surface_getbuffer,
++  image_surface_releasebuffer,
++};
++#endif
++
++
+ static PyMethodDef image_surface_methods[] = {
+   {"create_for_data",(PyCFunction)image_surface_create_for_data,
+    METH_VARARGS | METH_CLASS},
+@@ -918,11 +936,7 @@ PyTypeObject PycairoImageSurface_Type = {
+   0,                                  /* tp_str */
+   0,                                  /* tp_getattro */
+   0,                                  /* tp_setattro */
+-#if PY_MAJOR_VERSION < 3
+   &image_surface_as_buffer,           /* tp_as_buffer */
+-#else
+-  0,                                  /* tp_as_buffer */
+-#endif
+ #if PY_MAJOR_VERSION < 3
+   Py_TPFLAGS_DEFAULT |
+      Py_TPFLAGS_HAVE_GETCHARBUFFER,   /* tp_flags */

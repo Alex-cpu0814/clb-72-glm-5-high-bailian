@@ -1,0 +1,13 @@
+diff --git a/src_c/_freetype.c b/src_c/_freetype.c
+index 05e111b..ae62d91 100644
+--- a/src_c/_freetype.c
++++ b/src_c/_freetype.c
+@@ -1416,7 +1416,7 @@ _ftfont_getmetrics(pgFontObject *self, PyObject *args, PyObject *kwds)
+      * rotation/styles/vertical text
+      */
+     if (_PGFT_BuildRenderMode(self->freetype, self, &render, face_size,
+-                              FT_STYLE_NORMAL, 0))
++                              FT_STYLE_DEFAULT, self->rotation))
+         goto error;
+ 
+     /* get metrics */

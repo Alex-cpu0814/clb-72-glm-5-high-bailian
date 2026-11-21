@@ -1,0 +1,127 @@
+diff --git a/src_c/draw.c b/src_c/draw.c
+index 2ac3772..a99dec8 100644
+--- a/src_c/draw.c
++++ b/src_c/draw.c
+@@ -922,21 +922,109 @@ rect(PyObject *self, PyObject *args, PyObject *kwargs)
+          bottom_left_radius <= 0 && bottom_right_radius <= 0) ||
+         abs(rect->w) < 2 || abs(rect->h) < 2) {
+         if (width > 0) {
+-            l = rect->x;
+-            r = rect->x + rect->w - 1;
+-            t = rect->y;
+-            b = rect->y + rect->h - 1;
+-            points =
+-                Py_BuildValue("((ii)(ii)(ii)(ii))", l, t, r, t, r, b, l, b);
+-            poly_args =
+-                Py_BuildValue("(OONi)", surfobj, colorobj, points, width);
+-            if (NULL == poly_args) {
+-                return NULL; /* Exception already set. */
++            /* Normalize the rect */
++            x = rect->x;
++            y = rect->y;
++            w = rect->w;
++            h = rect->h;
++
++            if (w < 0) {
++                x += w;
++                w = -w;
+             }
+ 
+-            ret = polygon(NULL, poly_args, NULL);
+-            Py_DECREF(poly_args);
+-            return ret;
++            if (h < 0) {
++                y += h;
++                h = -h;
++            }
++
++            /* If width is too large, fill the whole rect */
++            if (width * 2 >= w || width * 2 >= h) {
++                sdlrect.x = x;
++                sdlrect.y = y;
++                sdlrect.w = w;
++                sdlrect.h = h;
++
++                SDL_GetClipRect(surf, &cliprect);
++
++                if (!SDL_IntersectRect(&sdlrect, &cliprect, &clipped)) {
++                    return pgRect_New4(rect->x, rect->y, 0, 0);
++                }
++                pgSurface_Prep(surfobj);
++                pgSurface_Lock(surfobj);
++                result = SDL_FillRect(surf, &clipped, color);
++                pgSurface_Unlock(surfobj);
++                pgSurface_Unprep(surfobj);
++                if (result != 0)
++                    return RAISE(pgExc_SDLError, SDL_GetError());
++                return pgRect_New(&clipped);
++            }
++
++            /* Draw 4 filled rects for the outline */
++            pgSurface_Prep(surfobj);
++            pgSurface_Lock(surfobj);
++
++            /* Top edge */
++            sdlrect.x = x;
++            sdlrect.y = y;
++            sdlrect.w = w;
++            sdlrect.h = width;
++            result = SDL_FillRect(surf, &sdlrect, color);
++            if (result != 0) {
++                pgSurface_Unlock(surfobj);
++                pgSurface_Unprep(surfobj);
++                return RAISE(pgExc_SDLError, SDL_GetError());
++            }
++
++            /* Bottom edge */
++            sdlrect.x = x;
++            sdlrect.y = y + h - width;
++            sdlrect.w = w;
++            sdlrect.h = width;
++            result = SDL_FillRect(surf, &sdlrect, color);
++            if (result != 0) {
++                pgSurface_Unlock(surfobj);
++                pgSurface_Unprep(surfobj);
++                return RAISE(pgExc_SDLError, SDL_GetError());
++            }
++
++            /* Left edge */
++            sdlrect.x = x;
++            sdlrect.y = y + width;
++            sdlrect.w = width;
++            sdlrect.h = h - 2 * width;
++            result = SDL_FillRect(surf, &sdlrect, color);
++            if (result != 0) {
++                pgSurface_Unlock(surfobj);
++                pgSurface_Unprep(surfobj);
++                return RAISE(pgExc_SDLError, SDL_GetError());
++            }
++
++            /* Right edge */
++            sdlrect.x = x + w - width;
++            sdlrect.y = y + width;
++            sdlrect.w = width;
++            sdlrect.h = h - 2 * width;
++            result = SDL_FillRect(surf, &sdlrect, color);
++            if (result != 0) {
++                pgSurface_Unlock(surfobj);
++                pgSurface_Unprep(surfobj);
++                return RAISE(pgExc_SDLError, SDL_GetError());
++            }
++
++            pgSurface_Unlock(surfobj);
++            pgSurface_Unprep(surfobj);
++
++            /* Return the bounding box of the drawn area */
++            SDL_GetClipRect(surf, &cliprect);
++            sdlrect.x = x;
++            sdlrect.y = y;
++            sdlrect.w = w;
++            sdlrect.h = h;
++            if (!SDL_IntersectRect(&sdlrect, &cliprect, &clipped)) {
++                return pgRect_New4(rect->x, rect->y, 0, 0);
++            }
++            return pgRect_New(&clipped);
+         }
+         else {
+             sdlrect.x = rect->x;

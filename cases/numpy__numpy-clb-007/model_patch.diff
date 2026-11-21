@@ -1,0 +1,14 @@
+diff --git a/numpy/core/src/multiarray/ctors.c b/numpy/core/src/multiarray/ctors.c
+index 502ab0e..6c31a45 100644
+--- a/numpy/core/src/multiarray/ctors.c
++++ b/numpy/core/src/multiarray/ctors.c
+@@ -1079,7 +1079,8 @@ PyArray_NewFromDescr_int(
+             data = npy_alloc_cache(nbytes);
+         }
+         if (data == NULL) {
+-            return raise_memory_error(fa->nd, fa->dimensions, descr);
++            raise_memory_error(fa->nd, fa->dimensions, descr);
++            goto fail;
+         }
+         fa->flags |= NPY_ARRAY_OWNDATA;
+ 

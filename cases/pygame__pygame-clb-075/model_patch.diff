@@ -1,0 +1,94 @@
+diff --git a/buildconfig/pygame-stubs/time.pyi b/buildconfig/pygame-stubs/time.pyi
+index 2e68671..51123e9 100644
+--- a/buildconfig/pygame-stubs/time.pyi
++++ b/buildconfig/pygame-stubs/time.pyi
+@@ -5,7 +5,10 @@ def get_ticks() -> int: ...
+ def wait(milliseconds: int) -> int: ...
+ def delay(milliseconds: int) -> int: ...
+ def set_timer(
+-    event_type: Union[int, Event], milliseconds: int, once: Optional[bool] = False
++    event: Union[int, Event],
++    milliseconds: int,
++    once: Optional[bool] = False,
++    repeat: Optional[int] = 0
+ ) -> None: ...
+ 
+ class Clock:
+diff --git a/docs/reST/ref/time.rst b/docs/reST/ref/time.rst
+index 723699c..93a7435 100644
+--- a/docs/reST/ref/time.rst
++++ b/docs/reST/ref/time.rst
+@@ -52,13 +52,19 @@ resolution, in milliseconds, is given in the ``TIMER_RESOLUTION`` constant.
+ .. function:: set_timer
+ 
+    | :sl:`repeatedly create an event on the event queue`
+-   | :sg:`set_timer(eventid, milliseconds) -> None`
+-   | :sg:`set_timer(eventid, milliseconds, once) -> None`
++   | :sg:`set_timer(event, milliseconds) -> None`
++   | :sg:`set_timer(event, milliseconds, once) -> None`
++   | :sg:`set_timer(event, milliseconds, once, repeat) -> None`
+ 
+    Set an event type to appear on the event queue every given number of
+    milliseconds. The first event will not appear until the amount of time has
+    passed.
+ 
++   The event parameter can be an :class:`pygame.event.Event` object or an
++   integer representing the event type. Using an Event object allows you to
++   create timer events with custom attributes, enabling differentiation between
++   timers that share the same event type.
++
+    Every event type can have a separate timer attached to it. It is best to use
+    the value between ``pygame.USEREVENT`` and ``pygame.NUMEVENTS``.
+ 
+@@ -66,8 +72,19 @@ resolution, in milliseconds, is given in the ``TIMER_RESOLUTION`` constant.
+ 
+    If the once argument is True, then only send the timer once.
+ 
++   If the repeat argument is set to a positive integer, the timer will send
++   that many events before stopping. If repeat is 0 (the default), the timer
++   will continue to send events indefinitely.
++
++   The repeat argument takes precedence over the once argument if both are
++   specified.
++
+    .. versionadded:: 2.0.0.dev3 once argument added.
+ 
++   .. versionadded:: 2.0.0.dev8 event parameter accepts Event objects.
++
++   .. versionadded:: 2.0.0.dev8 repeat argument added.
++
+    .. ## pygame.time.set_timer ##
+ 
+ .. class:: Clock
+diff --git a/src_c/doc/time_doc.h b/src_c/doc/time_doc.h
+index 5b6017d..77a49c1 100644
+--- a/src_c/doc/time_doc.h
++++ b/src_c/doc/time_doc.h
+@@ -3,7 +3,7 @@
+ #define DOC_PYGAMETIMEGETTICKS "get_ticks() -> milliseconds\nget the time in milliseconds"
+ #define DOC_PYGAMETIMEWAIT "wait(milliseconds) -> time\npause the program for an amount of time"
+ #define DOC_PYGAMETIMEDELAY "delay(milliseconds) -> time\npause the program for an amount of time"
+-#define DOC_PYGAMETIMESETTIMER "set_timer(eventid, milliseconds) -> None\nset_timer(eventid, milliseconds, once) -> None\nrepeatedly create an event on the event queue"
++#define DOC_PYGAMETIMESETTIMER "set_timer(event, milliseconds) -> None\nset_timer(event, milliseconds, once) -> None\nset_timer(event, milliseconds, once, repeat) -> None\nrepeatedly create an event on the event queue"
+ #define DOC_PYGAMETIMECLOCK "Clock() -> Clock\ncreate an object to help track time"
+ #define DOC_CLOCKTICK "tick(framerate=0) -> milliseconds\nupdate the clock"
+ #define DOC_CLOCKTICKBUSYLOOP "tick_busy_loop(framerate=0) -> milliseconds\nupdate the clock"
+@@ -32,8 +32,9 @@ pygame.time.delay
+ pause the program for an amount of time
+ 
+ pygame.time.set_timer
+- set_timer(eventid, milliseconds) -> None
+- set_timer(eventid, milliseconds, once) -> None
++ set_timer(event, milliseconds) -> None
++ set_timer(event, milliseconds, once) -> None
++ set_timer(event, milliseconds, once, repeat) -> None
+ repeatedly create an event on the event queue
+ 
+ pygame.time.Clock
+@@ -60,4 +61,4 @@ pygame.time.Clock.get_fps
+  get_fps() -> float
+ compute the clock framerate
+ 
+-*/
+\ No newline at end of file
++*/

@@ -1,0 +1,52 @@
+diff --git a/fast_histogram/_histogram_core.c b/fast_histogram/_histogram_core.c
+index a2c3634..774e486 100644
+--- a/fast_histogram/_histogram_core.c
++++ b/fast_histogram/_histogram_core.c
+@@ -80,7 +80,7 @@ static PyObject *_histogram1d(PyObject *self, PyObject *args)
+     }
+ 
+     /* How many data points are there? */
+-    n = (long)PyArray_DIM(x_array, 0);
++    n = (long)PyArray_SIZE(x_array);
+ 
+     /* Build the output array */
+     dims[0] = nx;
+@@ -150,10 +150,10 @@ static PyObject *_histogram2d(PyObject *self, PyObject *args)
+     }
+ 
+     /* How many data points are there? */
+-    n = (long)PyArray_DIM(x_array, 0);
++    n = (long)PyArray_SIZE(x_array);
+ 
+     /* Check the dimensions. */
+-    if (n != (long)PyArray_DIM(y_array, 0)) {
++    if (n != (long)PyArray_SIZE(y_array)) {
+         PyErr_SetString(PyExc_RuntimeError, "Dimension mismatch between x and y");
+         Py_DECREF(x_array);
+         Py_DECREF(y_array);
+@@ -235,10 +235,10 @@ static PyObject *_histogram1d_weighted(PyObject *self, PyObject *args)
+     }
+ 
+     /* How many data points are there? */
+-    n = (long)PyArray_DIM(x_array, 0);
++    n = (long)PyArray_SIZE(x_array);
+ 
+     /* Check the dimensions. */
+-    if (n != (long)PyArray_DIM(w_array, 0)) {
++    if (n != (long)PyArray_SIZE(w_array)) {
+         PyErr_SetString(PyExc_RuntimeError, "Dimension mismatch between x and w");
+         Py_DECREF(x_array);
+         Py_DECREF(w_array);
+@@ -318,10 +318,10 @@ static PyObject *_histogram2d_weighted(PyObject *self, PyObject *args)
+     }
+ 
+     /* How many data points are there? */
+-    n = (long)PyArray_DIM(x_array, 0);
++    n = (long)PyArray_SIZE(x_array);
+ 
+     /* Check the dimensions. */
+-    if (n != (long)PyArray_DIM(y_array, 0) || n != (long)PyArray_DIM(w_array, 0)) {
++    if (n != (long)PyArray_SIZE(y_array) || n != (long)PyArray_SIZE(w_array)) {
+         PyErr_SetString(PyExc_RuntimeError, "Dimension mismatch between x, y, and w");
+         Py_DECREF(x_array);
+         Py_DECREF(y_array);

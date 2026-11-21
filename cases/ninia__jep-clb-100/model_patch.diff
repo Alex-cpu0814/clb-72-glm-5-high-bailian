@@ -1,0 +1,161 @@
+diff --git a/src/jep/util.c b/src/jep/util.c
+index c189b6b..a121cae 100644
+--- a/src/jep/util.c
++++ b/src/jep/util.c
+@@ -54,6 +54,8 @@
+ #endif
+ #include "Python.h"
+ 
++#include <string.h>
++
+ #include "util.h"
+ #include "pyjobject.h"
+ #include "pyjarray.h"
+@@ -112,6 +114,10 @@ jmethodID getFloatValue      = 0;
+ jmethodID getCharValue       = 0;
+ 
+ // exception handling
++static jmethodID classGetName = 0;
++
++// map java exception to Python exception type
++static PyObject* get_pyexception_type(JNIEnv*, jthrowable, jclass);
+ jmethodID jepExcInitStr = NULL;
+ jmethodID jepExcInitStrThrow = NULL;
+ jmethodID stackTraceElemInit = NULL;
+@@ -565,10 +571,118 @@ int process_import_exception(JNIEnv *env) {
+ 
+ // convert java exception to pyerr.
+ // true (1) if an exception was processed.
++
++/*
++ * Maps Java exception types to the appropriate Python exception type.
++ * 
++ * @param env       the JNI environment
++ * @param exception the Java throwable
++ * @param clazz     the jclass for the throwable
++ *
++ * @return the appropriate Python exception type
++ */
++static PyObject* get_pyexception_type(JNIEnv *env, jthrowable exception, jclass clazz) {
++    jstring className = NULL;
++    const char *classNameStr = NULL;
++    PyObject *pyExcType = PyExc_RuntimeError;
++    jclass langClass = NULL;
++    
++    // get the Class object for java.lang.Class to find getName method
++    if(classGetName == 0) {
++        langClass = (*env)->FindClass(env, "java/lang/Class");
++        if(!langClass || (*env)->ExceptionCheck(env)) {
++            return PyExc_RuntimeError;
++        }
++        classGetName = (*env)->GetMethodID(env, langClass, "getName", "()Ljava/lang/String;");
++        if(!classGetName || (*env)->ExceptionCheck(env)) {
++            return PyExc_RuntimeError;
++        }
++    }
++    
++    // get the class name of the exception
++    className = (jstring) (*env)->CallObjectMethod(env, clazz, classGetName);
++    if(!className || (*env)->ExceptionCheck(env)) {
++        return PyExc_RuntimeError;
++    }
++    
++    classNameStr = (*env)->GetStringUTFChars(env, className, 0);
++    if(!classNameStr) {
++        (*env)->ReleaseStringUTFChars(env, className, classNameStr);
++        (*env)->DeleteLocalRef(env, className);
++        return PyExc_RuntimeError;
++    }
++    
++    // map common Java exceptions to Python exceptions
++    // using strcmp on the fully qualified class name
++    if(strcmp(classNameStr, "java.lang.NumberFormatException") == 0) {
++        pyExcType = PyExc_ValueError;
++    }
++    else if(strcmp(classNameStr, "java.lang.IllegalArgumentException") == 0) {
++        pyExcType = PyExc_ValueError;
++    }
++    else if(strcmp(classNameStr, "java.lang.IllegalStateException") == 0) {
++        pyExcType = PyExc_RuntimeError;
++    }
++    else if(strcmp(classNameStr, "java.lang.NullPointerException") == 0) {
++        pyExcType = PyExc_AttributeError;
++    }
++    else if(strcmp(classNameStr, "java.lang.IndexOutOfBoundsException") == 0) {
++        pyExcType = PyExc_IndexError;
++    }
++    else if(strcmp(classNameStr, "java.lang.ArrayIndexOutOfBoundsException") == 0) {
++        pyExcType = PyExc_IndexError;
++    }
++    else if(strcmp(classNameStr, "java.lang.StringIndexOutOfBoundsException") == 0) {
++        pyExcType = PyExc_IndexError;
++    }
++    else if(strcmp(classNameStr, "java.lang.ArrayStoreException") == 0) {
++        pyExcType = PyExc_TypeError;
++    }
++    else if(strcmp(classNameStr, "java.lang.ClassCastException") == 0) {
++        pyExcType = PyExc_TypeError;
++    }
++    else if(strcmp(classNameStr, "java.lang.UnsupportedOperationException") == 0) {
++        pyExcType = PyExc_NotImplementedError;
++    }
++    else if(strcmp(classNameStr, "java.lang.ArithmeticException") == 0) {
++        pyExcType = PyExc_ZeroDivisionError;
++    }
++    else if(strcmp(classNameStr, "java.lang.OutOfMemoryError") == 0) {
++        pyExcType = PyExc_MemoryError;
++    }
++    else if(strcmp(classNameStr, "java.io.IOException") == 0) {
++        pyExcType = PyExc_IOError;
++    }
++    else if(strcmp(classNameStr, "java.io.FileNotFoundException") == 0) {
++        pyExcType = PyExc_IOError;
++    }
++    else if(strcmp(classNameStr, "java.io.EOFException") == 0) {
++        pyExcType = PyExc_EOFError;
++    }
++    else if(strcmp(classNameStr, "java.lang.NoSuchMethodException") == 0) {
++        pyExcType = PyExc_AttributeError;
++    }
++    else if(strcmp(classNameStr, "java.lang.NoSuchFieldException") == 0) {
++        pyExcType = PyExc_AttributeError;
++    }
++    // Check for ImportError-related exceptions
++    else if(strcmp(classNameStr, "java.lang.ClassNotFoundException") == 0) {
++        pyExcType = PyExc_ImportError;
++    }
++    else if(strcmp(classNameStr, "java.lang.NoClassDefFoundError") == 0) {
++        pyExcType = PyExc_ImportError;
++    }
++    
++    (*env)->ReleaseStringUTFChars(env, className, classNameStr);
++    (*env)->DeleteLocalRef(env, className);
++    
++    return pyExcType;
++}
++
+ int process_java_exception(JNIEnv *env) {
+     jthrowable exception = NULL;
+     jclass clazz;
+-    PyObject *pyException = PyExc_RuntimeError;
++    PyObject *pyException;
+     PyObject *jpyExc;
+     JepThread *jepThread;
+     jmethodID fillInStacktrace;
+@@ -607,6 +721,16 @@ int process_java_exception(JNIEnv *env) {
+ 
+     // turn the java exception into a pyjobject so the interpreter can handle it
+     jpyExc = pyjobject_new(env, exception);
++    
++    // determine the Python exception type based on the Java exception class
++    pyException = get_pyexception_type(env, exception, clazz);
++    
++    // clear any exception that occurred during get_pyexception_type
++    if((*env)->ExceptionCheck(env)) {
++        (*env)->ExceptionClear(env);
++        pyException = PyExc_RuntimeError;
++    }
++    
+     if((*env)->ExceptionCheck(env) || !jpyExc) {
+         PyErr_Format(PyExc_RuntimeError,
+                 "wrapping java exception in pyjobject failed.");
