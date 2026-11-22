@@ -1,0 +1,45 @@
+Instance: tskit-dev__tskit-clb-046
+Log: Test Log
+
+============================= test session starts ==============================
+platform linux -- Python 3.8.20, pytest-7.4.4, pluggy-1.3.0 -- /usr/local/bin/python
+rootdir: /testbed
+configfile: ../dev/null
+collecting ... collected 4 items
+
+python/tests/test_highlevel.py::TestTree::test_newick PASSED             [ 25%]
+python/tests/test_lowlevel.py::TestTree::test_newick_precision PASSED    [ 50%]
+python/tests/test_highlevel.py::TestTree::test_newick_large_times PASSED [ 75%]
+python/tests/test_lowlevel.py::TestTree::test_newick_interface FAILED    [100%]
+
+=================================== FAILURES ===================================
+________________________ TestTree.test_newick_interface ________________________
+
+self = <tests.test_lowlevel.TestTree testMethod=test_newick_interface>
+
+    def test_newick_interface(self):
+        ts = self.get_example_tree_sequence()
+        st = _tskit.Tree(ts)
+        # TODO this will break when we correctly handle multiple roots.
+        self.assertEqual(st.get_newick(0), b"1;")
+        for bad_type in [None, "", [], {}]:
+            self.assertRaises(TypeError, st.get_newick, precision=bad_type)
+            self.assertRaises(TypeError, st.get_newick, ts, buffer_size=bad_type)
+        while st.next():
+            u = st.get_left_root()
+            newick = st.get_newick(u)
+            self.assertTrue(newick.endswith(b";"))
+            with self.assertRaises(ValueError):
+>               st.get_newick(u, buffer_size=-1)
+E               TypeError: 'buffer_size' is an invalid keyword argument for this function
+
+python/tests/test_lowlevel.py:1850: TypeError
+=============================== warnings summary ===============================
+python/tskit/tables.py:46
+  /testbed/python/tskit/tables.py:46: DeprecationWarning: The usage of `cmp` is deprecated and will be removed on or after 2021-06-01.  Please use `eq` and `order` instead.
+    @attr.s(cmp=False, **attr_options)
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ============================
+FAILED python/tests/test_lowlevel.py::TestTree::test_newick_interface - TypeE...
+==================== 1 failed, 3 passed, 1 warning in 1.96s ====================

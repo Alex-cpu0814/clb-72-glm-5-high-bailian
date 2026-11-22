@@ -1,0 +1,29 @@
+Instance: pygobject__pycairo-clb-137
+Log: Test Log
+
+============================= test session starts ==============================
+platform linux -- Python 3.6.15, pytest-3.0.7, py-1.4.34, pluggy-0.4.0 -- /usr/local/bin/python
+cachedir: .cache
+rootdir: /testbed, inifile:
+collecting ... collected 72 items
+
+tests/test_surface.py::test_surface_get_device_scale PASSED
+tests/test_surface.py::test_surface_get_content PASSED
+tests/test_surface.py::test_surface_get_format PASSED
+tests/test_surface.py::test_surface_set_device_scale FAILED
+
+=================================== FAILURES ===================================
+________________________ test_surface_set_device_scale _________________________
+
+    def test_surface_set_device_scale():
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 10, 10)
+        ret = surface.set_device_scale(5.0, 3.0)
+        assert ret is None
+    
+        surface = cairo.ImageSurface(cairo.FORMAT_ARGB32, 100, 100)
+        with pytest.raises(cairo.Error):
+>           surface.set_device_scale(1, 0)
+E           ValueError: scale must not be zero
+
+tests/test_surface.py:74: ValueError
+====================== 1 failed, 3 passed in 0.13 seconds ======================

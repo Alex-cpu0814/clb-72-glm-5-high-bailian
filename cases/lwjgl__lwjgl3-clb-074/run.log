@@ -1,0 +1,4 @@
+Instance: lwjgl__lwjgl3-clb-074
+Log: Test Log
+
+{"oracle_type": "runtime_behavior", "phase": "runtime", "infrastructure_error": false, "tests": {"org.lwjgl.system.PointerInitializationProbe::pointerWidth": {"status": "passed", "exit_code": 0}, "org.lwjgl.system.PointerInitializationProbe::allocatorSelection": {"status": "failed", "exit_code": 1}}}

@@ -1,0 +1,44 @@
+Instance: numpy__numpy-clb-014
+Log: Test Log
+
+/usr/local/lib/python3.8/dist-packages/_pytest/compat.py:333: PytestDeprecationWarning: The TerminalReporter.writer attribute is deprecated, use TerminalReporter._tw instead at your own risk.
+See https://docs.pytest.org/en/latest/deprecations.html#terminalreporter-writer for more information.
+  return getattr(object, name, default)
+============================= test session starts ==============================
+platform linux -- Python 3.8.10, pytest-5.4.2, py-1.11.0, pluggy-0.13.1 -- /usr/bin/python3.8-dbg
+cachedir: .pytest_cache
+hypothesis profile 'default' -> database=DirectoryBasedExampleDatabase('/testbed/.hypothesis/examples')
+rootdir: /testbed, inifile: pytest.ini
+plugins: leaks-0.3.1, hypothesis-5.14.0, env-0.6.2
+collecting ... collected 3 items
+
+numpy/core/tests/test_dtype.py::TestRecord::test_partial_dict PASSED     [ 33%]
+numpy/core/tests/test_dtype.py::TestSubarray::test_single_subarray PASSED [ 66%]
+numpy/core/tests/test_dtype.py::TestRecord::test_fieldless_views FAILED  [100%]
+
+=================================== FAILURES ===================================
+_______________________ TestRecord.test_fieldless_views ________________________
+
+self = <numpy.core.tests.test_dtype.TestRecord object at 0x74f38a43dd70>
+
+    def test_fieldless_views(self):
+        a = np.zeros(2, dtype={'names':[], 'formats':[], 'offsets':[],
+                               'itemsize':8})
+        assert_raises(ValueError, a.view, np.dtype([]))
+    
+        d = np.dtype((np.dtype([]), 10))
+>       assert_equal(d.shape, (10,))
+E       AssertionError: 
+E       Items are not equal:
+E        ACTUAL: 0
+E        DESIRED: 1
+
+a          = array([(), ()],
+      dtype={'names':[], 'formats':[], 'offsets':[], 'itemsize':8})
+d          = dtype({'names':[], 'formats':[], 'offsets':[], 'itemsize':10})
+self       = <numpy.core.tests.test_dtype.TestRecord object at 0x74f38a43dd70>
+
+numpy/core/tests/test_dtype.py:428: AssertionError
+=========================== short test summary info ============================
+FAILED numpy/core/tests/test_dtype.py::TestRecord::test_fieldless_views - Ass...
+========================= 1 failed, 2 passed in 0.39s ==========================

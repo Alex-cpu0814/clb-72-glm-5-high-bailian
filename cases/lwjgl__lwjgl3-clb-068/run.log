@@ -1,0 +1,4 @@
+Instance: lwjgl__lwjgl3-clb-068
+Log: Test Log
+
+{"oracle_type": "runtime_behavior", "phase": "runtime", "infrastructure_error": false, "tests": {"org.lwjgl.openvr.VRCompositorNullGamePoseTest::nonNullGamePose": {"status": "passed", "exit_code": 0}, "org.lwjgl.openvr.VRCompositorNullGamePoseTest::nullGamePose": {"status": "passed", "exit_code": 0}}}

@@ -1,0 +1,164 @@
+Instance: uclouvain__openjpeg-clb-112
+Log: Model Run Log
+API attempt events. Free-text provider errors are omitted.
+
+{"timestamp_utc": "2026-11-10T09:40:37.651873+00:00", "kind": "native_query_attempt_started", "attempt": 1}
+{"timestamp_utc": "2026-11-10T09:40:40.356999+00:00", "kind": "native_query_attempt_response", "attempt": 1, "response_model": "glm-5", "usage": {"completion_tokens": 118, "prompt_tokens": 1254, "total_tokens": 1372}}
+{"timestamp_utc": "2026-11-10T09:40:40.793213+00:00", "kind": "native_query_attempt_started", "attempt": 2}
+{"timestamp_utc": "2026-11-10T09:40:42.745238+00:00", "kind": "native_query_attempt_response", "attempt": 2, "response_model": "glm-5", "usage": {"completion_tokens": 67, "prompt_tokens": 2525, "total_tokens": 2592}}
+{"timestamp_utc": "2026-11-10T09:40:43.374058+00:00", "kind": "native_query_attempt_started", "attempt": 3}
+{"timestamp_utc": "2026-11-10T09:40:46.090739+00:00", "kind": "native_query_attempt_response", "attempt": 3, "response_model": "glm-5", "usage": {"completion_tokens": 64, "prompt_tokens": 3993, "total_tokens": 4057}}
+{"timestamp_utc": "2026-11-10T09:40:46.348308+00:00", "kind": "native_query_attempt_started", "attempt": 4}
+{"timestamp_utc": "2026-11-10T09:40:48.043944+00:00", "kind": "native_query_attempt_response", "attempt": 4, "response_model": "glm-5", "usage": {"completion_tokens": 42, "prompt_tokens": 4284, "total_tokens": 4326}}
+{"timestamp_utc": "2026-11-10T09:40:48.393335+00:00", "kind": "native_query_attempt_started", "attempt": 5}
+{"timestamp_utc": "2026-11-10T09:40:50.962868+00:00", "kind": "native_query_attempt_response", "attempt": 5, "response_model": "glm-5", "usage": {"completion_tokens": 96, "prompt_tokens": 5943, "total_tokens": 6039}}
+{"timestamp_utc": "2026-11-10T09:40:51.733592+00:00", "kind": "native_query_attempt_started", "attempt": 6}
+{"timestamp_utc": "2026-11-10T09:40:53.707958+00:00", "kind": "native_query_attempt_response", "attempt": 6, "response_model": "glm-5", "usage": {"completion_tokens": 72, "prompt_tokens": 6095, "total_tokens": 6167}}
+{"timestamp_utc": "2026-11-10T09:40:54.599703+00:00", "kind": "native_query_attempt_started", "attempt": 7}
+{"timestamp_utc": "2026-11-10T09:40:58.440048+00:00", "kind": "native_query_attempt_response", "attempt": 7, "response_model": "glm-5", "usage": {"completion_tokens": 163, "prompt_tokens": 8799, "total_tokens": 8962}}
+{"timestamp_utc": "2026-11-10T09:40:58.964899+00:00", "kind": "native_query_attempt_started", "attempt": 8}
+{"timestamp_utc": "2026-11-10T09:41:01.911648+00:00", "kind": "native_query_attempt_response", "attempt": 8, "response_model": "glm-5", "usage": {"completion_tokens": 139, "prompt_tokens": 9005, "total_tokens": 9144}}
+{"timestamp_utc": "2026-11-10T09:41:02.442339+00:00", "kind": "native_query_attempt_started", "attempt": 9}
+{"timestamp_utc": "2026-11-10T09:41:05.363086+00:00", "kind": "native_query_attempt_response", "attempt": 9, "response_model": "glm-5", "usage": {"completion_tokens": 90, "prompt_tokens": 10955, "total_tokens": 11045}}
+{"timestamp_utc": "2026-11-10T09:41:05.796187+00:00", "kind": "native_query_attempt_started", "attempt": 10}
+{"timestamp_utc": "2026-11-10T09:41:08.325289+00:00", "kind": "native_query_attempt_response", "attempt": 10, "response_model": "glm-5", "usage": {"completion_tokens": 89, "prompt_tokens": 13522, "total_tokens": 13611}}
+{"timestamp_utc": "2026-11-10T09:41:08.684850+00:00", "kind": "native_query_attempt_started", "attempt": 11}
+{"timestamp_utc": "2026-11-10T09:41:10.481207+00:00", "kind": "native_query_attempt_response", "attempt": 11, "response_model": "glm-5", "usage": {"completion_tokens": 58, "prompt_tokens": 14059, "total_tokens": 14117}}
+{"timestamp_utc": "2026-11-10T09:41:10.673653+00:00", "kind": "native_query_attempt_started", "attempt": 12}
+{"timestamp_utc": "2026-11-10T09:41:12.613903+00:00", "kind": "native_query_attempt_response", "attempt": 12, "response_model": "glm-5", "usage": {"completion_tokens": 59, "prompt_tokens": 15802, "total_tokens": 15861}}
+{"timestamp_utc": "2026-11-10T09:41:12.984150+00:00", "kind": "native_query_attempt_started", "attempt": 13}
+{"timestamp_utc": "2026-11-10T09:41:16.287919+00:00", "kind": "native_query_attempt_response", "attempt": 13, "response_model": "glm-5", "usage": {"completion_tokens": 134, "prompt_tokens": 17425, "total_tokens": 17559}}
+{"timestamp_utc": "2026-11-10T09:41:16.745133+00:00", "kind": "native_query_attempt_started", "attempt": 14}
+{"timestamp_utc": "2026-11-10T09:41:20.279235+00:00", "kind": "native_query_attempt_response", "attempt": 14, "response_model": "glm-5", "usage": {"completion_tokens": 161, "prompt_tokens": 21041, "total_tokens": 21202}}
+{"timestamp_utc": "2026-11-10T09:41:20.571292+00:00", "kind": "native_query_attempt_started", "attempt": 15}
+{"timestamp_utc": "2026-11-10T09:41:25.050683+00:00", "kind": "native_query_attempt_response", "attempt": 15, "response_model": "glm-5", "usage": {"completion_tokens": 187, "prompt_tokens": 21501, "total_tokens": 21688}}
+{"timestamp_utc": "2026-11-10T09:41:25.338617+00:00", "kind": "native_query_attempt_started", "attempt": 16}
+{"timestamp_utc": "2026-11-10T09:41:27.527534+00:00", "kind": "native_query_attempt_response", "attempt": 16, "response_model": "glm-5", "usage": {"completion_tokens": 63, "prompt_tokens": 23943, "total_tokens": 24006}}
+{"timestamp_utc": "2026-11-10T09:41:27.925007+00:00", "kind": "native_query_attempt_started", "attempt": 17}
+{"timestamp_utc": "2026-11-10T09:41:31.151178+00:00", "kind": "native_query_attempt_response", "attempt": 17, "response_model": "glm-5", "usage": {"completion_tokens": 121, "prompt_tokens": 24749, "total_tokens": 24870}}
+{"timestamp_utc": "2026-11-10T09:41:31.640970+00:00", "kind": "native_query_attempt_started", "attempt": 18}
+{"timestamp_utc": "2026-11-10T09:41:34.179344+00:00", "kind": "native_query_attempt_response", "attempt": 18, "response_model": "glm-5", "usage": {"completion_tokens": 66, "prompt_tokens": 26703, "total_tokens": 26769}}
+{"timestamp_utc": "2026-11-10T09:41:34.486255+00:00", "kind": "native_query_attempt_started", "attempt": 19}
+{"timestamp_utc": "2026-11-10T09:41:37.213580+00:00", "kind": "native_query_attempt_response", "attempt": 19, "response_model": "glm-5", "usage": {"completion_tokens": 62, "prompt_tokens": 27812, "total_tokens": 27874}}
+{"timestamp_utc": "2026-11-10T09:41:37.483589+00:00", "kind": "native_query_attempt_started", "attempt": 20}
+{"timestamp_utc": "2026-11-10T09:41:39.423144+00:00", "kind": "native_query_attempt_response", "attempt": 20, "response_model": "glm-5", "usage": {"completion_tokens": 58, "prompt_tokens": 29325, "total_tokens": 29383}}
+{"timestamp_utc": "2026-11-10T09:41:39.745476+00:00", "kind": "native_query_attempt_started", "attempt": 21}
+{"timestamp_utc": "2026-11-10T09:41:43.380363+00:00", "kind": "native_query_attempt_response", "attempt": 21, "response_model": "glm-5", "usage": {"completion_tokens": 135, "prompt_tokens": 31376, "total_tokens": 31511}}
+{"timestamp_utc": "2026-11-10T09:41:43.732085+00:00", "kind": "native_query_attempt_started", "attempt": 22}
+{"timestamp_utc": "2026-11-10T09:41:46.380552+00:00", "kind": "native_query_attempt_response", "attempt": 22, "response_model": "glm-5", "usage": {"completion_tokens": 68, "prompt_tokens": 35495, "total_tokens": 35563}}
+{"timestamp_utc": "2026-11-10T09:41:46.837397+00:00", "kind": "native_query_attempt_started", "attempt": 23}
+{"timestamp_utc": "2026-11-10T09:41:49.255170+00:00", "kind": "native_query_attempt_response", "attempt": 23, "response_model": "glm-5", "usage": {"completion_tokens": 58, "prompt_tokens": 35982, "total_tokens": 36040}}
+{"timestamp_utc": "2026-11-10T09:41:49.677979+00:00", "kind": "native_query_attempt_started", "attempt": 24}
+{"timestamp_utc": "2026-11-10T09:41:52.031532+00:00", "kind": "native_query_attempt_response", "attempt": 24, "response_model": "glm-5", "usage": {"completion_tokens": 61, "prompt_tokens": 37045, "total_tokens": 37106}}
+{"timestamp_utc": "2026-11-10T09:41:52.318117+00:00", "kind": "native_query_attempt_started", "attempt": 25}
+{"timestamp_utc": "2026-11-10T09:41:57.023035+00:00", "kind": "native_query_attempt_response", "attempt": 25, "response_model": "glm-5", "usage": {"completion_tokens": 199, "prompt_tokens": 38769, "total_tokens": 38968}}
+{"timestamp_utc": "2026-11-10T09:41:57.207394+00:00", "kind": "native_query_attempt_started", "attempt": 26}
+{"timestamp_utc": "2026-11-10T09:42:01.438800+00:00", "kind": "native_query_attempt_response", "attempt": 26, "response_model": "glm-5", "usage": {"completion_tokens": 182, "prompt_tokens": 39905, "total_tokens": 40087}}
+{"timestamp_utc": "2026-11-10T09:42:01.885476+00:00", "kind": "native_query_attempt_started", "attempt": 27}
+{"timestamp_utc": "2026-11-10T09:42:04.213117+00:00", "kind": "native_query_attempt_response", "attempt": 27, "response_model": "glm-5", "usage": {"completion_tokens": 66, "prompt_tokens": 40734, "total_tokens": 40800}}
+{"timestamp_utc": "2026-11-10T09:42:04.682662+00:00", "kind": "native_query_attempt_started", "attempt": 28}
+{"timestamp_utc": "2026-11-10T09:42:07.173031+00:00", "kind": "native_query_attempt_response", "attempt": 28, "response_model": "glm-5", "usage": {"completion_tokens": 47, "prompt_tokens": 41673, "total_tokens": 41720}}
+{"timestamp_utc": "2026-11-10T09:42:07.633054+00:00", "kind": "native_query_attempt_started", "attempt": 29}
+{"timestamp_utc": "2026-11-10T09:42:09.775897+00:00", "kind": "native_query_attempt_response", "attempt": 29, "response_model": "glm-5", "usage": {"completion_tokens": 62, "prompt_tokens": 42093, "total_tokens": 42155}}
+{"timestamp_utc": "2026-11-10T09:42:09.961072+00:00", "kind": "native_query_attempt_started", "attempt": 30}
+{"timestamp_utc": "2026-11-10T09:42:12.309601+00:00", "kind": "native_query_attempt_response", "attempt": 30, "response_model": "glm-5", "usage": {"completion_tokens": 58, "prompt_tokens": 42389, "total_tokens": 42447}}
+{"timestamp_utc": "2026-11-10T09:42:12.571308+00:00", "kind": "native_query_attempt_started", "attempt": 31}
+{"timestamp_utc": "2026-11-10T09:42:14.776216+00:00", "kind": "native_query_attempt_response", "attempt": 31, "response_model": "glm-5", "usage": {"completion_tokens": 55, "prompt_tokens": 43332, "total_tokens": 43387}}
+{"timestamp_utc": "2026-11-10T09:42:15.111106+00:00", "kind": "native_query_attempt_started", "attempt": 32}
+{"timestamp_utc": "2026-11-10T09:42:17.196946+00:00", "kind": "native_query_attempt_response", "attempt": 32, "response_model": "glm-5", "usage": {"completion_tokens": 54, "prompt_tokens": 44457, "total_tokens": 44511}}
+{"timestamp_utc": "2026-11-10T09:42:17.435293+00:00", "kind": "native_query_attempt_started", "attempt": 33}
+{"timestamp_utc": "2026-11-10T09:42:19.602695+00:00", "kind": "native_query_attempt_response", "attempt": 33, "response_model": "glm-5", "usage": {"completion_tokens": 76, "prompt_tokens": 45096, "total_tokens": 45172}}
+{"timestamp_utc": "2026-11-10T09:42:19.805928+00:00", "kind": "native_query_attempt_started", "attempt": 34}
+{"timestamp_utc": "2026-11-10T09:42:21.816173+00:00", "kind": "native_query_attempt_response", "attempt": 34, "response_model": "glm-5", "usage": {"completion_tokens": 52, "prompt_tokens": 45590, "total_tokens": 45642}}
+{"timestamp_utc": "2026-11-10T09:42:22.001521+00:00", "kind": "native_query_attempt_started", "attempt": 35}
+{"timestamp_utc": "2026-11-10T09:42:23.715228+00:00", "kind": "native_query_attempt_response", "attempt": 35, "response_model": "glm-5", "usage": {"completion_tokens": 38, "prompt_tokens": 47062, "total_tokens": 47100}}
+{"timestamp_utc": "2026-11-10T09:42:23.933591+00:00", "kind": "native_query_attempt_started", "attempt": 36}
+{"timestamp_utc": "2026-11-10T09:42:27.758803+00:00", "kind": "native_query_attempt_response", "attempt": 36, "response_model": "glm-5", "usage": {"completion_tokens": 81, "prompt_tokens": 48754, "total_tokens": 48835}}
+{"timestamp_utc": "2026-11-10T09:42:28.070292+00:00", "kind": "native_query_attempt_started", "attempt": 37}
+{"timestamp_utc": "2026-11-10T09:42:30.330009+00:00", "kind": "native_query_attempt_response", "attempt": 37, "response_model": "glm-5", "usage": {"completion_tokens": 48, "prompt_tokens": 51579, "total_tokens": 51627}}
+{"timestamp_utc": "2026-11-10T09:42:30.568985+00:00", "kind": "native_query_attempt_started", "attempt": 38}
+{"timestamp_utc": "2026-11-10T09:42:34.303485+00:00", "kind": "native_query_attempt_response", "attempt": 38, "response_model": "glm-5", "usage": {"completion_tokens": 147, "prompt_tokens": 51819, "total_tokens": 51966}}
+{"timestamp_utc": "2026-11-10T09:42:34.588667+00:00", "kind": "native_query_attempt_started", "attempt": 39}
+{"timestamp_utc": "2026-11-10T09:42:36.547511+00:00", "kind": "native_query_attempt_response", "attempt": 39, "response_model": "glm-5", "usage": {"completion_tokens": 45, "prompt_tokens": 52442, "total_tokens": 52487}}
+{"timestamp_utc": "2026-11-10T09:42:36.875046+00:00", "kind": "native_query_attempt_started", "attempt": 40}
+{"timestamp_utc": "2026-11-10T09:42:40.322623+00:00", "kind": "native_query_attempt_response", "attempt": 40, "response_model": "glm-5", "usage": {"completion_tokens": 134, "prompt_tokens": 53700, "total_tokens": 53834}}
+{"timestamp_utc": "2026-11-10T09:42:40.687932+00:00", "kind": "native_query_attempt_started", "attempt": 41}
+{"timestamp_utc": "2026-11-10T09:42:45.810026+00:00", "kind": "native_query_attempt_response", "attempt": 41, "response_model": "glm-5", "usage": {"completion_tokens": 143, "prompt_tokens": 54205, "total_tokens": 54348}}
+{"timestamp_utc": "2026-11-10T09:42:46.137444+00:00", "kind": "native_query_attempt_started", "attempt": 42}
+{"timestamp_utc": "2026-11-10T09:42:47.879776+00:00", "kind": "native_query_attempt_response", "attempt": 42, "response_model": "glm-5", "usage": {"completion_tokens": 36, "prompt_tokens": 55555, "total_tokens": 55591}}
+{"timestamp_utc": "2026-11-10T09:42:48.415722+00:00", "kind": "native_query_attempt_started", "attempt": 43}
+{"timestamp_utc": "2026-11-10T09:42:53.102012+00:00", "kind": "native_query_attempt_response", "attempt": 43, "response_model": "glm-5", "usage": {"completion_tokens": 188, "prompt_tokens": 58149, "total_tokens": 58337}}
+{"timestamp_utc": "2026-11-10T09:42:53.533258+00:00", "kind": "native_query_attempt_started", "attempt": 44}
+{"timestamp_utc": "2026-11-10T09:42:56.589220+00:00", "kind": "native_query_attempt_response", "attempt": 44, "response_model": "glm-5", "usage": {"completion_tokens": 128, "prompt_tokens": 59329, "total_tokens": 59457}}
+{"timestamp_utc": "2026-11-10T09:42:56.845998+00:00", "kind": "native_query_attempt_started", "attempt": 45}
+{"timestamp_utc": "2026-11-10T09:42:59.932734+00:00", "kind": "native_query_attempt_response", "attempt": 45, "response_model": "glm-5", "usage": {"completion_tokens": 45, "prompt_tokens": 60281, "total_tokens": 60326}}
+{"timestamp_utc": "2026-11-10T09:43:00.260587+00:00", "kind": "native_query_attempt_started", "attempt": 46}
+{"timestamp_utc": "2026-11-10T09:43:06.691127+00:00", "kind": "native_query_attempt_response", "attempt": 46, "response_model": "glm-5", "usage": {"completion_tokens": 281, "prompt_tokens": 60680, "total_tokens": 60961}}
+{"timestamp_utc": "2026-11-10T09:43:06.875321+00:00", "kind": "native_query_attempt_started", "attempt": 47}
+{"timestamp_utc": "2026-11-10T09:43:10.367425+00:00", "kind": "native_query_attempt_response", "attempt": 47, "response_model": "glm-5", "usage": {"completion_tokens": 110, "prompt_tokens": 62759, "total_tokens": 62869}}
+{"timestamp_utc": "2026-11-10T09:43:10.552403+00:00", "kind": "native_query_attempt_started", "attempt": 48}
+{"timestamp_utc": "2026-11-10T09:43:12.295165+00:00", "kind": "native_query_attempt_error", "attempt": 48, "error_type": "RateLimitError"}
+{"timestamp_utc": "2026-11-10T09:43:16.318239+00:00", "kind": "native_query_attempt_started", "attempt": 49}
+{"timestamp_utc": "2026-11-10T09:43:21.188959+00:00", "kind": "native_query_attempt_response", "attempt": 49, "response_model": "glm-5", "usage": {"completion_tokens": 218, "prompt_tokens": 63197, "total_tokens": 63415}}
+{"timestamp_utc": "2026-11-10T09:43:21.368376+00:00", "kind": "native_query_attempt_started", "attempt": 50}
+{"timestamp_utc": "2026-11-10T09:43:32.357943+00:00", "kind": "native_query_attempt_response", "attempt": 50, "response_model": "glm-5", "usage": {"completion_tokens": 585, "prompt_tokens": 63635, "total_tokens": 64220}}
+{"timestamp_utc": "2026-11-10T09:43:32.752072+00:00", "kind": "native_query_attempt_started", "attempt": 51}
+{"timestamp_utc": "2026-11-10T09:43:38.316023+00:00", "kind": "native_query_attempt_response", "attempt": 51, "response_model": "glm-5", "usage": {"completion_tokens": 346, "prompt_tokens": 64284, "total_tokens": 64630}}
+{"timestamp_utc": "2026-11-10T09:43:38.985550+00:00", "kind": "native_query_attempt_started", "attempt": 52}
+{"timestamp_utc": "2026-11-10T09:43:42.673491+00:00", "kind": "native_query_attempt_response", "attempt": 52, "response_model": "glm-5", "usage": {"completion_tokens": 100, "prompt_tokens": 64688, "total_tokens": 64788}}
+{"timestamp_utc": "2026-11-10T09:43:43.025692+00:00", "kind": "native_query_attempt_started", "attempt": 53}
+{"timestamp_utc": "2026-11-10T09:43:52.129272+00:00", "kind": "native_query_attempt_response", "attempt": 53, "response_model": "glm-5", "usage": {"completion_tokens": 753, "prompt_tokens": 65238, "total_tokens": 65991}}
+{"timestamp_utc": "2026-11-10T09:43:52.641045+00:00", "kind": "native_query_attempt_started", "attempt": 54}
+{"timestamp_utc": "2026-11-10T09:43:55.280611+00:00", "kind": "native_query_attempt_response", "attempt": 54, "response_model": "glm-5", "usage": {"completion_tokens": 49, "prompt_tokens": 66321, "total_tokens": 66370}}
+{"timestamp_utc": "2026-11-10T09:43:55.692024+00:00", "kind": "native_query_attempt_started", "attempt": 55}
+{"timestamp_utc": "2026-11-10T09:43:57.820624+00:00", "kind": "native_query_attempt_response", "attempt": 55, "response_model": "glm-5", "usage": {"completion_tokens": 45, "prompt_tokens": 67064, "total_tokens": 67109}}
+{"timestamp_utc": "2026-11-10T09:43:58.317985+00:00", "kind": "native_query_attempt_started", "attempt": 56}
+{"timestamp_utc": "2026-11-10T09:44:00.345375+00:00", "kind": "native_query_attempt_error", "attempt": 56, "error_type": "RateLimitError"}
+{"timestamp_utc": "2026-11-10T09:44:04.375769+00:00", "kind": "native_query_attempt_started", "attempt": 57}
+{"timestamp_utc": "2026-11-10T09:44:06.126828+00:00", "kind": "native_query_attempt_response", "attempt": 57, "response_model": "glm-5", "usage": {"completion_tokens": 52, "prompt_tokens": 67380, "total_tokens": 67432}}
+{"timestamp_utc": "2026-11-10T09:44:06.463112+00:00", "kind": "native_query_attempt_started", "attempt": 58}
+{"timestamp_utc": "2026-11-10T09:44:08.221917+00:00", "kind": "native_query_attempt_response", "attempt": 58, "response_model": "glm-5", "usage": {"completion_tokens": 48, "prompt_tokens": 68160, "total_tokens": 68208}}
+{"timestamp_utc": "2026-11-10T09:44:08.481015+00:00", "kind": "native_query_attempt_started", "attempt": 59}
+{"timestamp_utc": "2026-11-10T09:44:12.605679+00:00", "kind": "native_query_attempt_response", "attempt": 59, "response_model": "glm-5", "usage": {"completion_tokens": 228, "prompt_tokens": 68819, "total_tokens": 69047}}
+{"timestamp_utc": "2026-11-10T09:44:12.958619+00:00", "kind": "native_query_attempt_started", "attempt": 60}
+{"timestamp_utc": "2026-11-10T09:44:17.519565+00:00", "kind": "native_query_attempt_response", "attempt": 60, "response_model": "glm-5", "usage": {"completion_tokens": 243, "prompt_tokens": 69655, "total_tokens": 69898}}
+{"timestamp_utc": "2026-11-10T09:44:17.862807+00:00", "kind": "native_query_attempt_started", "attempt": 61}
+{"timestamp_utc": "2026-11-10T09:44:22.626533+00:00", "kind": "native_query_attempt_response", "attempt": 61, "response_model": "glm-5", "usage": {"completion_tokens": 231, "prompt_tokens": 70817, "total_tokens": 71048}}
+{"timestamp_utc": "2026-11-10T09:44:22.841034+00:00", "kind": "native_query_attempt_started", "attempt": 62}
+{"timestamp_utc": "2026-11-10T09:44:24.521840+00:00", "kind": "native_query_attempt_response", "attempt": 62, "response_model": "glm-5", "usage": {"completion_tokens": 70, "prompt_tokens": 71067, "total_tokens": 71137}}
+{"timestamp_utc": "2026-11-10T09:44:24.885022+00:00", "kind": "native_query_attempt_started", "attempt": 63}
+{"timestamp_utc": "2026-11-10T09:44:29.043396+00:00", "kind": "native_query_attempt_response", "attempt": 63, "response_model": "glm-5", "usage": {"completion_tokens": 239, "prompt_tokens": 71882, "total_tokens": 72121}}
+{"timestamp_utc": "2026-11-10T09:44:29.380423+00:00", "kind": "native_query_attempt_started", "attempt": 64}
+{"timestamp_utc": "2026-11-10T09:44:33.789301+00:00", "kind": "native_query_attempt_response", "attempt": 64, "response_model": "glm-5", "usage": {"completion_tokens": 99, "prompt_tokens": 72140, "total_tokens": 72239}}
+{"timestamp_utc": "2026-11-10T09:44:34.077645+00:00", "kind": "native_query_attempt_started", "attempt": 65}
+{"timestamp_utc": "2026-11-10T09:44:36.770688+00:00", "kind": "native_query_attempt_response", "attempt": 65, "response_model": "glm-5", "usage": {"completion_tokens": 88, "prompt_tokens": 72420, "total_tokens": 72508}}
+{"timestamp_utc": "2026-11-10T09:44:37.137064+00:00", "kind": "native_query_attempt_started", "attempt": 66}
+{"timestamp_utc": "2026-11-10T09:44:39.112419+00:00", "kind": "native_query_attempt_response", "attempt": 66, "response_model": "glm-5", "usage": {"completion_tokens": 105, "prompt_tokens": 73020, "total_tokens": 73125}}
+{"timestamp_utc": "2026-11-10T09:44:39.369230+00:00", "kind": "native_query_attempt_started", "attempt": 67}
+{"timestamp_utc": "2026-11-10T09:44:41.254606+00:00", "kind": "native_query_attempt_error", "attempt": 67, "error_type": "RateLimitError"}
+{"timestamp_utc": "2026-11-10T09:44:45.288818+00:00", "kind": "native_query_attempt_started", "attempt": 68}
+{"timestamp_utc": "2026-11-10T09:44:49.607023+00:00", "kind": "native_query_attempt_response", "attempt": 68, "response_model": "glm-5", "usage": {"completion_tokens": 224, "prompt_tokens": 74218, "total_tokens": 74442}}
+{"timestamp_utc": "2026-11-10T09:44:50.691606+00:00", "kind": "native_query_attempt_started", "attempt": 69}
+{"timestamp_utc": "2026-11-10T09:44:53.296960+00:00", "kind": "native_query_attempt_response", "attempt": 69, "response_model": "glm-5", "usage": {"completion_tokens": 43, "prompt_tokens": 74461, "total_tokens": 74504}}
+{"timestamp_utc": "2026-11-10T09:44:53.922718+00:00", "kind": "native_query_attempt_started", "attempt": 70}
+{"timestamp_utc": "2026-11-10T09:44:56.168792+00:00", "kind": "native_query_attempt_response", "attempt": 70, "response_model": "glm-5", "usage": {"completion_tokens": 51, "prompt_tokens": 75142, "total_tokens": 75193}}
+{"timestamp_utc": "2026-11-10T09:45:00.318405+00:00", "kind": "native_query_attempt_started", "attempt": 71}
+{"timestamp_utc": "2026-11-10T09:45:01.798375+00:00", "kind": "native_query_attempt_response", "attempt": 71, "response_model": "glm-5", "usage": {"completion_tokens": 35, "prompt_tokens": 75489, "total_tokens": 75524}}
+{"timestamp_utc": "2026-11-10T09:45:05.107555+00:00", "kind": "native_query_attempt_started", "attempt": 72}
+{"timestamp_utc": "2026-11-10T09:45:07.489334+00:00", "kind": "native_query_attempt_response", "attempt": 72, "response_model": "glm-5", "usage": {"completion_tokens": 120, "prompt_tokens": 76230, "total_tokens": 76350}}
+{"timestamp_utc": "2026-11-10T09:45:07.736889+00:00", "kind": "native_query_attempt_started", "attempt": 73}
+{"timestamp_utc": "2026-11-10T09:45:09.543549+00:00", "kind": "native_query_attempt_response", "attempt": 73, "response_model": "glm-5", "usage": {"completion_tokens": 54, "prompt_tokens": 76369, "total_tokens": 76423}}
+{"timestamp_utc": "2026-11-10T09:45:09.875288+00:00", "kind": "native_query_attempt_started", "attempt": 74}
+{"timestamp_utc": "2026-11-10T09:45:11.702783+00:00", "kind": "native_query_attempt_error", "attempt": 74, "error_type": "RateLimitError"}
+{"timestamp_utc": "2026-11-10T09:45:15.724254+00:00", "kind": "native_query_attempt_started", "attempt": 75}
+{"timestamp_utc": "2026-11-10T09:45:18.318336+00:00", "kind": "native_query_attempt_response", "attempt": 75, "response_model": "glm-5", "usage": {"completion_tokens": 52, "prompt_tokens": 76470, "total_tokens": 76522}}
+{"timestamp_utc": "2026-11-10T09:45:18.518247+00:00", "kind": "native_query_attempt_started", "attempt": 76}
+{"timestamp_utc": "2026-11-10T09:45:20.543880+00:00", "kind": "native_query_attempt_response", "attempt": 76, "response_model": "glm-5", "usage": {"completion_tokens": 59, "prompt_tokens": 76640, "total_tokens": 76699}}
+{"timestamp_utc": "2026-11-10T09:45:21.170002+00:00", "kind": "native_query_attempt_started", "attempt": 77}
+{"timestamp_utc": "2026-11-10T09:45:24.304270+00:00", "kind": "native_query_attempt_response", "attempt": 77, "response_model": "glm-5", "usage": {"completion_tokens": 58, "prompt_tokens": 76735, "total_tokens": 76793}}
+{"timestamp_utc": "2026-11-10T09:45:24.896871+00:00", "kind": "native_query_attempt_started", "attempt": 78}
+{"timestamp_utc": "2026-11-10T09:45:27.661716+00:00", "kind": "native_query_attempt_response", "attempt": 78, "response_model": "glm-5", "usage": {"completion_tokens": 36, "prompt_tokens": 76825, "total_tokens": 76861}}
+{"timestamp_utc": "2026-11-10T09:45:28.103921+00:00", "kind": "native_query_attempt_started", "attempt": 79}
+{"timestamp_utc": "2026-11-10T09:45:29.983386+00:00", "kind": "native_query_attempt_response", "attempt": 79, "response_model": "glm-5", "usage": {"completion_tokens": 40, "prompt_tokens": 76928, "total_tokens": 76968}}
+{"timestamp_utc": "2026-11-10T09:45:30.517881+00:00", "kind": "native_query_attempt_started", "attempt": 80}
+{"timestamp_utc": "2026-11-10T09:45:33.466201+00:00", "kind": "native_query_attempt_response", "attempt": 80, "response_model": "glm-5", "usage": {"completion_tokens": 47, "prompt_tokens": 77046, "total_tokens": 77093}}
