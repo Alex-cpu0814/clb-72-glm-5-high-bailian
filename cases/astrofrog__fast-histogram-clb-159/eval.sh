@@ -1,0 +1,66 @@
+#!/bin/bash
+set -uo pipefail
+ulimit -c 0
+
+fail() {
+    printf '%s\n' '>>>>> Tests Errored' "$1" >&2
+    exit 2
+}
+
+cd /testbed || fail 'Cannot enter /testbed'
+[[ "$(git rev-parse HEAD)" == "085efdad6570e25440beab781ef70e1f81605c12" ]] || fail 'Unexpected Base commit'
+git checkout 085efdad6570e25440beab781ef70e1f81605c12 -- fast_histogram/tests/test_histogram.py || fail 'Test file restoration failed'
+git apply --whitespace=nowarn - <<'CLB_TEST_PATCH' || fail 'Test patch application failed'
+diff --git a/fast_histogram/tests/test_histogram.py b/fast_histogram/tests/test_histogram.py
+index f4c86a6..198f49b 100644
+--- a/fast_histogram/tests/test_histogram.py
++++ b/fast_histogram/tests/test_histogram.py
+@@ -201,3 +201,32 @@ def test_array_bins():
+         histogram2d([1, 2, 3], [1, 2 ,3], bins=[edges, edges],
+                     range=[(0, 10), (0, 10)])
+     assert exc.value.args[0] == 'bins should be an iterable of two integers'
++
++
++def test_mixed_strides():
++
++    # Make sure all functions work properly when passed arrays with mismatched
++    # strides.
++
++    x = np.random.random((30, 20, 40, 50))[:, 10, :, 20]
++    y = np.random.random((30, 40, 50))[:, :, 10]
++    z = np.random.random((30, 10, 5, 80, 90))[:, 5, 2, ::2, 22]
++
++    assert x.shape == y.shape and x.shape == z.shape
++    assert x.strides != y.strides and y.strides != z.strides and z.strides != x.strides
++
++    result_1 = histogram1d(x, bins=10, range=(0, 1))
++    result_2, _ = np.histogram(x, bins=10, range=(0, 1))
++    np.testing.assert_equal(result_1, result_2)
++
++    result_3 = histogram1d(x, weights=y, bins=10, range=(0, 1))
++    result_4, _ = np.histogram(x, weights=y, bins=10, range=(0, 1))
++    np.testing.assert_equal(result_3, result_4)
++
++    result_5 = histogram2d(x, y, bins=(10, 10), range=[(0, 1), (0, 1)])
++    result_6, _, _ = np.histogram2d(x.ravel(), y.ravel(), bins=(10, 10), range=[(0, 1), (0, 1)])
++    np.testing.assert_equal(result_5, result_6)
++
++    result_7 = histogram2d(x, y, weights=z, bins=(10, 10), range=[(0, 1), (0, 1)])
++    result_8, _, _ = np.histogram2d(x.ravel(), y.ravel(), weights=z.ravel(), bins=(10, 10), range=[(0, 1), (0, 1)])
++    np.testing.assert_equal(result_7, result_8)
+CLB_TEST_PATCH
+
+python setup.py build_ext --inplace --force || fail 'Project build failed'
+set +x
+printf '%s\n' '>>>>> Start Test Output'
+python -m pytest -vv --color=no -o console_output_style=classic \
+    fast_histogram/tests/test_histogram.py::test_nd_arrays \
+    fast_histogram/tests/test_histogram.py::test_list \
+    fast_histogram/tests/test_histogram.py::test_non_contiguous \
+    fast_histogram/tests/test_histogram.py::test_mixed_strides
+test_status=$?
+# SWE-bench records the status of the command immediately before the end marker.
+(exit "$test_status")
+printf '%s\n' '>>>>> End Test Output'
+git checkout 085efdad6570e25440beab781ef70e1f81605c12 -- fast_histogram/tests/test_histogram.py || fail 'Test file restoration failed'
+exit "$test_status"
