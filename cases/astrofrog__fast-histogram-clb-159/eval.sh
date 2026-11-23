@@ -1,16 +1,12 @@
 #!/bin/bash
-set -uo pipefail
-ulimit -c 0
-
-fail() {
-    printf '%s\n' '>>>>> Tests Errored' "$1" >&2
-    exit 2
-}
-
-cd /testbed || fail 'Cannot enter /testbed'
-[[ "$(git rev-parse HEAD)" == "085efdad6570e25440beab781ef70e1f81605c12" ]] || fail 'Unexpected Base commit'
-git checkout 085efdad6570e25440beab781ef70e1f81605c12 -- fast_histogram/tests/test_histogram.py || fail 'Test file restoration failed'
-git apply --whitespace=nowarn - <<'CLB_TEST_PATCH' || fail 'Test patch application failed'
+set -uxo pipefail
+cd /testbed
+git config --global --add safe.directory /testbed
+git status
+git show
+git -c core.fileMode=false diff 085efdad6570e25440beab781ef70e1f81605c12
+git checkout 085efdad6570e25440beab781ef70e1f81605c12 -- fast_histogram/tests/test_histogram.py
+git apply -v - <<'CLB_TEST_PATCH'
 diff --git a/fast_histogram/tests/test_histogram.py b/fast_histogram/tests/test_histogram.py
 index f4c86a6..198f49b 100644
 --- a/fast_histogram/tests/test_histogram.py
@@ -49,18 +45,12 @@ index f4c86a6..198f49b 100644
 +    result_8, _, _ = np.histogram2d(x.ravel(), y.ravel(), weights=z.ravel(), bins=(10, 10), range=[(0, 1), (0, 1)])
 +    np.testing.assert_equal(result_7, result_8)
 CLB_TEST_PATCH
-
-python setup.py build_ext --inplace --force || fail 'Project build failed'
-set +x
-printf '%s\n' '>>>>> Start Test Output'
-python -m pytest -vv --color=no -o console_output_style=classic \
+python setup.py build_ext --inplace --force || exit 2
+: '>>>>> Start Test Output'
+(python -m pytest -vv --color=no -o console_output_style=classic \
     fast_histogram/tests/test_histogram.py::test_nd_arrays \
     fast_histogram/tests/test_histogram.py::test_list \
     fast_histogram/tests/test_histogram.py::test_non_contiguous \
-    fast_histogram/tests/test_histogram.py::test_mixed_strides
-test_status=$?
-# SWE-bench records the status of the command immediately before the end marker.
-(exit "$test_status")
-printf '%s\n' '>>>>> End Test Output'
-git checkout 085efdad6570e25440beab781ef70e1f81605c12 -- fast_histogram/tests/test_histogram.py || fail 'Test file restoration failed'
-exit "$test_status"
+    fast_histogram/tests/test_histogram.py::test_mixed_strides) | cat
+: '>>>>> End Test Output'
+git checkout 085efdad6570e25440beab781ef70e1f81605c12 -- fast_histogram/tests/test_histogram.py
